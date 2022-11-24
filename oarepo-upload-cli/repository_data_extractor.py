@@ -23,7 +23,7 @@ class RepositoryDataExtractor:
         self.url = url
         self.token = token
 
-    def get_data(self, path: Path) -> Union(Any | None):
+    def get_data(self, path: Path) -> Union[Any, None]:
         """
         Sends a request to the given repository URL. Tries to acquire the data from the response determined by the given path.
 
