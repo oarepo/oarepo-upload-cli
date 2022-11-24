@@ -1,8 +1,12 @@
 from collections import deque
+from typing import Any, Deque, Dict, List, Union
 import requests
 from json import JSONDecodeError
 
 from token_auth import TokenAuth
+
+Path = List[str]
+ResponseContent = Dict
 
 class RepositoryCommunicationException(Exception):
     """
@@ -15,11 +19,11 @@ class RepositoryDataExtractor:
     Sends, processes and returns data from a request sent to the given repository.
     """
 
-    def __init__(self, url, token=None):
+    def __init__(self, url: str, token: str=None):
         self.url = url
         self.token = token
 
-    def get_data(self, path):
+    def get_data(self, path: Path) -> Union(Any | None):
         """
         Sends a request to the given repository URL. Tries to acquire the data from the response determined by the given path.
 
@@ -48,8 +52,7 @@ class RepositoryDataExtractor:
         except JSONDecodeError as serialization_err:
             raise RepositoryCommunicationException('Response could not be serialized') from serialization_err
 
-        path_to_check = deque(path)
-        found, invalid_path_item = self.__check_path(content, path_to_check)
+        found, invalid_path_item = self.__check_path(content, deque(path))
         if not found:
             print(f'Invalid item in the path: {invalid_path_item}')
             return
@@ -58,20 +61,20 @@ class RepositoryDataExtractor:
 
         return data
 
-    def __traverse_path(data, path):
+    def __traverse_path(content: ResponseContent, path: Path) -> Any:
         for p in path:
-            data = data[p]
+            content = content[p]
 
-        return data
+        return content
     
-    def __check_path(self, response_content: dict, path: deque[str]) -> bool:
-        if not path:
+    def __check_path(self, content: ResponseContent, path_to_check: Deque[str]) -> bool:
+        if not path_to_check:
             return True
         
-        p = path.popleft()
-        if not p in response_content:
+        p = path_to_check.popleft()
+        if not p in content:
             return False
     
-        return self.__check_path(response_content[p], path)
+        return self.__check_path(content[p], path_to_check)
         
 
