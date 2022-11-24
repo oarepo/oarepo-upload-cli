@@ -11,10 +11,15 @@ def main(args: argparse.Namespace) -> None:
     abstract_record = ep_loader.load_abstract_record(args.abstract_record)
     abstract_record_source = ep_loader.load_abstract_record_source(args.abstract_record_source)
 
+    records = abstract_record_source.get_records()
+    
     # TODO:
     # - load records from source
     # - get metadata from loaded records
     # - send put request if max date is older than current
+    
+    for r in records:
+        r_metadata = r.get_metadata()
 
 def init_args_parser():
     """
