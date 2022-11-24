@@ -37,22 +37,26 @@ class RepositoryDataExtractor:
 
             response.raise_for_status()
         except requests.ConnectionError as conn_err:
-            print(f'Network problem has occurred: {conn_err}.')
+            raise RepositoryCommunicationException('Network problem has occurred') from conn_err
         except requests.exceptions.HTTPError as http_err:
-            print(f'HTTP Error has occurred: {http_err}.')
+            raise RepositoryCommunicationException('HTTP error has occurred.') from http_err
         except Exception as err:
-            print(f'An error has occurred: {err}.')
-        else:
+            raise RepositoryCommunicationException() from err
+        
+        try:
             content = response.json()
+        except JSONDecodeError as serialization_err:
+            raise RepositoryCommunicationException('Response could not be serialized') from serialization_err
 
-            found, invalid_path_item = self.__check_path(content, path)
-            if not found:
-                print(f'Invalid item in the path: {invalid_path_item}')
-                return
-            
-            data = self.__traverse_path(content, path)
+        path_to_check = deque(path)
+        found, invalid_path_item = self.__check_path(content, path_to_check)
+        if not found:
+            print(f'Invalid item in the path: {invalid_path_item}')
+            return
+        
+        data = self.__traverse_path(content, path)
 
-            return data
+        return data
 
     def __traverse_path(data, path):
         for p in path:
@@ -60,7 +64,14 @@ class RepositoryDataExtractor:
 
         return data
     
-    def __check_path(self, response_content: dict, path: list[str]) -> bool:
-        pass
+    def __check_path(self, response_content: dict, path: deque[str]) -> bool:
+        if not path:
+            return True
+        
+        p = path.popleft()
+        if not p in response_content:
+            return False
+    
+        return self.__check_path(response_content[p], path)
         
 
