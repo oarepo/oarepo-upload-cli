@@ -8,7 +8,7 @@ class AbstractRecordMeta(type):
     def __subclasscheck__(cls, subclass) -> bool:
         return hasattr(subclass, 'get_metadata') and callable(subclass.get_metadata)
     
-class AbstractRecordInterface(metaclass=AbstractRecordMeta):
+class AbstractRecord(metaclass=AbstractRecordMeta):
     """
     Interface for concrete record.
     """

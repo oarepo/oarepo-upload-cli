@@ -8,7 +8,7 @@ class AbstractRecordSourceMeta(type):
     def __subclasscheck__(cls, subclass) -> bool:
         return hasattr(subclass, 'get_records') and callable(subclass.get_records)
     
-class AbstractRecordSourceInterface(metaclass=AbstractRecordSourceMeta):
+class AbstractRecordSource(metaclass=AbstractRecordSourceMeta):
     """
     Interface for concrete record provider.
     """
