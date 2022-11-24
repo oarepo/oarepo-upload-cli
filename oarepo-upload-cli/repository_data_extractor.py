@@ -10,7 +10,7 @@ ResponseContent = dict
 
 class RepositoryCommunicationException(Exception):
     """
-    Raised when a problem with requesting data from repository happens.
+    Raised when there is a problem with requesting data from repository happens.
     """    
     pass
 
