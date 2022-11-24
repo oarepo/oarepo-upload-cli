@@ -1,12 +1,12 @@
 from collections import deque
-from typing import Any, Deque, Dict, List, Union
+from typing import Any, Deque, Union
 import requests
 from json import JSONDecodeError
 
 from token_auth import TokenAuth
 
-Path = List[str]
-ResponseContent = Dict
+Path = list[str]
+ResponseContent = dict
 
 class RepositoryCommunicationException(Exception):
     """
