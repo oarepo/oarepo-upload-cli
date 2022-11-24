@@ -1,5 +1,14 @@
+from collections import deque
 import requests
+from json import JSONDecodeError
+
 from token_auth import TokenAuth
+
+class RepositoryCommunicationException(Exception):
+    """
+    Raised when a problem with requesting data from repository happens.
+    """    
+    pass
 
 class RepositoryDataExtractor:
     """
