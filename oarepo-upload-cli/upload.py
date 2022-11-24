@@ -9,7 +9,7 @@ def main(args: argparse.Namespace) -> None:
     
     ep_loader = EntryPointsLoader()
     abstract_record = ep_loader.load_abstract_record(args.abstract_record)
-    abstract_record_source = ep_loader.load_abstract_source(args.abstract_record_source)
+    abstract_record_source = ep_loader.load_abstract_record_source(args.abstract_record_source)
 
     # TODO:
     # - load records from source
