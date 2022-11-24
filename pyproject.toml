@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "oarepo-upload-cli"
+version = "0.0.1"
+dependencies = [
+    "argparse",
+    "pyenv",
+    "requests",
+    'importlib-metadata; python_version<"3.9"',
+]
