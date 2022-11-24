@@ -8,5 +8,10 @@ setup(
         'pyenv',
         'requests',
         'importlib-metadata; python_version == "3.9"',
-    ]
+    ],
+    entry_points={
+        'console_scripts': [
+            'upload = upload:main'
+        ]
+    }
 )
