@@ -1,7 +1,7 @@
 from collections import deque
-from typing import Any, Deque, Union
-import requests
 from json import JSONDecodeError
+import requests
+from typing import Any, Deque, Union
 
 from token_auth import TokenAuth
 
