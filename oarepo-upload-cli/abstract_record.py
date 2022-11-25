@@ -1,15 +1,12 @@
-class AbstractRecordMeta(type):
-    """
-    Abstract record metaclass that is used for record creation.
-    """
-    def __instancecheck__(cls, instance) -> bool:
-        return cls.__subclasscheck__(type(instance))
-    
-    def __subclasscheck__(cls, subclass) -> bool:
-        return hasattr(subclass, 'get_metadata') and callable(subclass.get_metadata)
-    
-class AbstractRecord(metaclass=AbstractRecordMeta):
+import abc
+
+class AbstractRecord(metaclass=abc.ABCMeta):
     """
     Interface for concrete record.
     """
-    pass
+    @abc.abstractmethod
+    def get_metadata(self):
+        """
+        Returns metadada serializable to JSON in the format that is acceptable by the repository.
+        """
+        raise NotImplementedError
