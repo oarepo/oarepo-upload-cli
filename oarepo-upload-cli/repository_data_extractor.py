@@ -51,7 +51,7 @@ class RepositoryDataExtractor:
             content = response.json()
         except JSONDecodeError as serialization_err:
             raise RepositoryCommunicationException('Response could not be serialized') from serialization_err
-
+        
         found, invalid_path_item = self.__check_path(content, deque(path))
         if not found:
             print(f'Invalid item in the path: {invalid_path_item}')
@@ -61,7 +61,7 @@ class RepositoryDataExtractor:
 
         return data
 
-    def __traverse_path(content: ResponseContent, path: Path) -> Any:
+    def __traverse_path(self, content: ResponseContent, path: Path) -> Any:
         for p in path:
             content = content[p]
 
@@ -69,11 +69,11 @@ class RepositoryDataExtractor:
     
     def __check_path(self, content: ResponseContent, path_to_check: Deque[str]) -> bool:
         if not path_to_check:
-            return True
+            return True, None
         
         p = path_to_check.popleft()
         if not p in content:
-            return False
+            return False, p
     
         return self.__check_path(content[p], path_to_check)
         
