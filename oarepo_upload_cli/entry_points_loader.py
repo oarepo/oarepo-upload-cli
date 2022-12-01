@@ -1,4 +1,4 @@
-from importlib.metadata import entry_points
+import importlib_metadata
 from typing import Any, NoReturn
 
 from abstract_record import AbstractRecord
@@ -12,34 +12,32 @@ class EntryPointNotFoundException(Exception):
 
 class EntryPointsLoader():
     def load_abstract_record_source(self, source_name_arg: str = None) -> AbstractRecordSource | NoReturn:
-        group, name = 'dependencies', 'oarepo-upload-source'
+        group, name = 'oarepo_upload_cli.dependencies', 'oarepo_upload_test_source'
 
-        abstract_record_source = self.__load(group, name, source_name_arg)
+        ep_record_source = self.__load(group, name, source_name_arg)
 
-        if not abstract_record_source:
+        if not ep_record_source:
             raise EntryPointNotFoundException('Abstract record source')
-
-        if not issubclass(abstract_record_source, AbstractRecordSourceInterface):
-            raise RuntimeError('Provided abstract record source does not correctly implement required interface.')
         
-        return abstract_record_source.load()
+        return ep_record_source.load()
 
     
-    def load_abstract_record(self, group: str, name: str, record_arg_name: str = None) -> AbstractRecord | NoReturn:
-        group, name = 'dependencies', 'oarepo-upload-record'
+    def load_abstract_record(self, record_arg_name: str = None) -> AbstractRecord | NoReturn:
+        group, name = 'oarepo_upload_cli.dependencies', 'oarepo_upload_test_record'
 
-        abstract_record = self.__load(group, name, record_arg_name)
+        ep_record = self.__load(group, name, record_arg_name)
 
-        if not abstract_record:
+        if not ep_record:
             raise EntryPointNotFoundException('Abstract record')
 
-        if not issubclass(abstract_record, AbstractRecordInterface):
-            raise RuntimeError('Abstract record entrypoint does not correctly implement required interface.')
-        
-        return abstract_record.load()
+        return ep_record.load()
 
-    def __load(self, group: str, name: str, arg_name: str = None) -> Any | NoReturn:
-        eps = entry_points().select(group=group, name=name)
+    def __load(self, group: str, name: str, arg_name: str = None) -> Any:
+        """
+        todo
+        """
+
+        eps = importlib_metadata.entry_points().select(group=group, name=name)
 
         if not eps:
             raise ValueError('Entry point not provided')

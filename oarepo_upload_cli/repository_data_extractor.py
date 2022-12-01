@@ -1,18 +1,13 @@
 from collections import deque
 from json import JSONDecodeError
 import requests
-from typing import Any, Deque, Union
+from typing import Any, Deque
 
+from repository_communication_exception import RepositoryCommunicationException
 from token_auth import TokenAuth
 
 Path = list[str]
 ResponseContent = dict
-
-class RepositoryCommunicationException(Exception):
-    """
-    Raised when there is a problem with requesting data from repository happens.
-    """    
-    pass
 
 class RepositoryDataExtractor:
     """
