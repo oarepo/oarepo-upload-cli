@@ -9,4 +9,9 @@ class AbstractRecord(metaclass=abc.ABCMeta):
         """
         Returns metadada serializable to JSON in the format that is acceptable by the repository.
         """
-        raise NotImplementedError
+
+    @property
+    @abc.abstractmethod
+    def id(self):
+        """
+        """    
