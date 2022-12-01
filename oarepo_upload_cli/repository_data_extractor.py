@@ -3,7 +3,7 @@ from json import JSONDecodeError
 import requests
 from typing import Any, Deque
 
-from exceptions import RepositoryCommunicationException
+from exceptions import ExceptionMessage, RepositoryCommunicationException
 from token_auth import TokenAuth
 
 Path = list[str]
@@ -36,16 +36,16 @@ class RepositoryDataExtractor:
 
             response.raise_for_status()
         except requests.ConnectionError as conn_err:
-            raise RepositoryCommunicationException('Network problem has occurred') from conn_err
+            raise RepositoryCommunicationException(ExceptionMessage.ConnectionError) from conn_err
         except requests.exceptions.HTTPError as http_err:
-            raise RepositoryCommunicationException('HTTP error has occurred.') from http_err
+            raise RepositoryCommunicationException(ExceptionMessage.HTTPError) from http_err
         except Exception as err:
             raise RepositoryCommunicationException() from err
         
         try:
             content = response.json()
         except JSONDecodeError as serialization_err:
-            raise RepositoryCommunicationException('Response could not be serialized') from serialization_err
+            raise RepositoryCommunicationException(ExceptionMessage.JSONContentNotSerializable) from serialization_err
         
         found, invalid_path_item = self.__check_path(content, deque(path))
         if not found:
