@@ -1,7 +1,7 @@
 import requests
 
 from abstract_record import AbstractRecord
-from repository_communication_exception import RepositoryCommunicationException
+from exceptions import RepositoryCommunicationException
 
 class RepositoryRecordsHandler:
     def __init__(self, base_repo_url: str):

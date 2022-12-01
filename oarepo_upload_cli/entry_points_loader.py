@@ -3,12 +3,7 @@ from typing import Any, NoReturn
 
 from abstract_record import AbstractRecord
 from abstract_record_source import AbstractRecordSource
-
-class EntryPointNotFoundException(Exception):
-    """
-    Raise when an entry point is not defined.
-    """
-    pass
+from exceptions import EntryPointNotFoundException
 
 class EntryPointsLoader():
     def load_abstract_record_source(self, source_name_arg: str = None) -> AbstractRecordSource | NoReturn:
@@ -32,7 +27,7 @@ class EntryPointsLoader():
 
         return ep_record.load()
 
-    def __load(self, group: str, name: str, arg_name: str = None) -> Any:
+    def __load(self, group: str, name: str, arg_name: str = None) -> Any | None:
         """
         todo
         """

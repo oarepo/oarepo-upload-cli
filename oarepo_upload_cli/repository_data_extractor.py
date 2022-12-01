@@ -3,7 +3,7 @@ from json import JSONDecodeError
 import requests
 from typing import Any, Deque
 
-from repository_communication_exception import RepositoryCommunicationException
+from exceptions import RepositoryCommunicationException
 from token_auth import TokenAuth
 
 Path = list[str]
