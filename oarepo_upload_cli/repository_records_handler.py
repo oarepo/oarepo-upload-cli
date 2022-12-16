@@ -15,7 +15,7 @@ class RepositoryRecordsHandler:
     def upload_record(self, record: AbstractRecord) -> None:
         """
         """
-        url = self.__create_url_for_record(record)
+        url = f'{self.collection_url}'
         metadata = record.get_metadata()
 
         try:
@@ -36,7 +36,7 @@ class RepositoryRecordsHandler:
     def create_record(self, record: AbstractRecord) -> None:
         """
         """
-        url = self.__create_url_for_record(record)
+        url = f'{self.collection_url}'
         metadata = record.get_metadata()
 
         try:
@@ -49,9 +49,6 @@ class RepositoryRecordsHandler:
             raise RepositoryCommunicationException(ExceptionMessage.HTTPError) from http_err
         except Exception as err:
             raise RepositoryCommunicationException() from err
-
-    def __create_url_for_record(self, record: AbstractRecord) -> str:
-        return f'{self.collection_url}/{record.id}'
 
         
 
