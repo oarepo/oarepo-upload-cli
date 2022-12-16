@@ -4,7 +4,7 @@ import requests
 from typing import Any, Deque
 
 from exceptions import ExceptionMessage, RepositoryCommunicationException
-from token_auth import TokenAuth
+from token_auth import BearerAuthentication
 
 Path = list[str]
 ResponseContent = dict
@@ -26,13 +26,7 @@ class RepositoryDataExtractor:
         """
 
         try:
-            response = None
-
-            if self.token:
-                # NOTE: prod preparation, after resolving what token we will use, remove the else branch
-                response = requests.get(self.url, auth=TokenAuth(self.token))
-            else:
-                response = requests.get(self.url)
+            response = requests.get(self.url, auth=BearerAuthentication(self.token))
 
             response.raise_for_status()
         except requests.ConnectionError as conn_err:
