@@ -3,6 +3,9 @@ import os
 from typing import Optional
 
 class AuthenticationTokenParser:
+    """
+    Unificator of token parsing from different sources.
+    """
     def __init__(self, token_arg: Optional[str]):
         self.token_arg = token_arg
         self.ini_group = 'authentication'
