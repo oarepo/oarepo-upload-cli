@@ -1,6 +1,7 @@
 import click
 from tqdm import tqdm
 
+from authentication_token_parser import AuthenticationTokenParser
 from repository_data_extractor import RepositoryDataExtractor
 from repository_records_handler import RepositoryRecordsHandler
 from entry_points_loader import EntryPointsLoader
@@ -10,8 +11,14 @@ from entry_points_loader import EntryPointsLoader
 @click.option('--source', help="Abstract record source entry point name.")
 @click.option('--modified_after', help="Timestamp that represents date after modification. If not specified, the last updated timestamp from repository will be used.")
 @click.option('--modified_before', help="Timestamp that represents date before modification.")
-@click.option('--token', help="SIS authentication token.")
+@click.option('-t', '--token', help="SIS bearer authentication token.")
 def main(collection_url, source, modified_after, modified_before, token) -> None:
+    token_parser = AuthenticationTokenParser(token)
+    token = token_parser.parse()
+    if not token:
+        print('Token is missing.')
+        return
+
     if not modified_after:
         repo_data_extractor = RepositoryDataExtractor(collection_url, token)
         modified_after = repo_data_extractor.get_data(path=["aggregations", "max_date", "value"])
