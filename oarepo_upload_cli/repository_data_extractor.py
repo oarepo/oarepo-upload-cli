@@ -14,7 +14,7 @@ class RepositoryDataExtractor:
     Sends, processes and returns data from a request sent to the given repository.
     """
 
-    def __init__(self, url: str, token: str=None):
+    def __init__(self, url: str, token: str):
         self.url = url
         self.token = token
 
