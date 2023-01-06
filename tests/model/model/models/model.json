@@ -1,0 +1,181 @@
+{
+    "version": "1.0.0",
+    "model": {
+        "properties": {
+            "metadata": {
+                "properties": {
+                    "updated": {
+                        "type": "date",
+                        "required": true,
+                        "oarepo:sample": {
+                            "faker": "iso8601",
+                            "skip": false
+                        }
+                    }
+                },
+                "oarepo:marshmallow": {
+                    "class": "model.services.schema.ModelMetadataSchema",
+                    "base-classes": [
+                        "ma.Schema"
+                    ],
+                    "generate": true
+                },
+                "type": "object"
+            },
+            "id": {
+                "type": "keyword",
+                "oarepo:sample": {
+                    "skip": true
+                },
+                "oarepo:marshmallow": {
+                    "read": false,
+                    "write": false
+                }
+            },
+            "created": {
+                "type": "date",
+                "oarepo:sample": {
+                    "skip": true
+                },
+                "oarepo:marshmallow": {
+                    "write": false,
+                    "read": true
+                }
+            },
+            "updated": {
+                "type": "date",
+                "oarepo:sample": {
+                    "skip": true
+                },
+                "oarepo:marshmallow": {
+                    "write": false,
+                    "read": true
+                }
+            },
+            "$schema": {
+                "type": "keyword",
+                "oarepo:marshmallow": {
+                    "read": false,
+                    "write": false
+                },
+                "oarepo:sample": {
+                    "skip": true
+                }
+            }
+        },
+        "oarepo:marshmallow": {
+            "base-classes": [
+                "invenio_records_resources.services.records.schema.BaseRecordSchema"
+            ],
+            "class": "model.services.schema.ModelSchema",
+            "generate": true
+        },
+        "type": "object"
+    },
+    "settings": {
+        "python": {
+            "use_isort": true,
+            "use_black": true,
+            "record-prefix": "Model",
+            "templates": {},
+            "marshmallow": {
+                "mapping": {}
+            },
+            "record-prefix-snake": "model",
+            "record-resources-package": "model.resources",
+            "record-services-package": "model.services",
+            "record-records-package": "model.records",
+            "config-package": "model.config",
+            "config-dummy-class": "model.config.DummyClass",
+            "config-resource-config-key": "MODEL_RESOURCE_CONFIG",
+            "config-resource-class-key": "MODEL_RESOURCE_CLASS",
+            "config-service-config-key": "MODEL_SERVICE_CONFIG",
+            "config-service-class-key": "MODEL_SERVICE_CLASS",
+            "config-resource-register-blueprint-key": "MODEL_REGISTER_BLUEPRINT",
+            "ext-class": "model.ext.ModelExt",
+            "flask-extension-name": "model",
+            "proxies-current-resource": "model.proxies.current_resource",
+            "proxies-current-service": "model.proxies.current_service",
+            "record-class": "model.records.api.ModelRecord",
+            "record-metadata-class": "model.records.models.ModelMetadata",
+            "record-metadata-table-name": "model_metadata",
+            "record-mapping-setup-cfg": "model",
+            "record-jsonschemas-setup-cfg": "model",
+            "record-resource-config-class": "model.resources.config.ModelResourceConfig",
+            "record-resource-class": "model.resources.resource.ModelResource",
+            "record-permissions-class": "model.services.permissions.ModelPermissionPolicy",
+            "record-service-class": "model.services.service.ModelService",
+            "record-service-config-class": "model.services.config.ModelServiceConfig",
+            "record-service-config-bases": [],
+            "record-service-config-generate-links": true,
+            "record-schema-class": "model.services.schema.ModelSchema",
+            "record-schema-metadata-class": "model.services.schema.ModelMetadataSchema",
+            "record-dumper-class": "model.records.dumper.ModelDumper",
+            "record-search-options-class": "model.services.search.ModelSearchOptions",
+            "record-facets-class": "model.services.facets.Test",
+            "record-schema-metadata-alembic": "model",
+            "record-schema-metadata-setup-cfg": "model",
+            "record-resource-blueprint-name": "Model",
+            "create-blueprint-from-app": "model.views.create_blueprint_from_app",
+            "invenio-config-extra-code": "",
+            "invenio-ext-extra-code": "",
+            "invenio-proxies-extra-code": "",
+            "invenio-record-extra-code": "",
+            "invenio-record-dumper-extra-code": "",
+            "invenio-record-facets-extra-code": "",
+            "invenio-record-metadata-extra-code": "",
+            "invenio-record-object-schema-extra-code": "",
+            "invenio-record-permissions-extra-code": "",
+            "invenio-record-resource-extra-code": "",
+            "invenio-record-resource-config-extra-code": "",
+            "invenio-record-schema-extra-code": "",
+            "invenio-record-search-options-extra-code": "",
+            "invenio-record-service-extra-code": "",
+            "invenio-record-service-config-extra-code": "",
+            "invenio-version-extra-code": "",
+            "invenio-views-extra-code": "",
+            "generate-record-pid-field": true,
+            "record-dumper-extensions": [],
+            "always-defined-import-prefixes": [
+                "ma",
+                "ma_fields",
+                "ma_valid"
+            ],
+            "script-import-sample-data-cli": "scripts.import_sample_data.cli"
+        },
+        "package": "model",
+        "processing-order": [
+            "settings",
+            "*",
+            "model"
+        ],
+        "package-base": "model",
+        "package-base-upper": "MODEL",
+        "kebap-package": "model",
+        "package-path": "model",
+        "schema-version": "1.0.0",
+        "schema-name": "model-1.0.0.json",
+        "schema-file": "model/records/jsonschemas/model-1.0.0.json",
+        "mapping-package": "model.records.mappings",
+        "jsonschemas-package": "model.records.jsonschemas",
+        "mapping-file": "model/records/mappings/v7/model/model-1.0.0.json",
+        "schema-server": "http://localhost/schemas/",
+        "index-name": "model-model-1.0.0",
+        "collection-url": "/model/",
+        "model-name": "model",
+        "saved-model-file": "model/models/model.json",
+        "inherited-model-file": "model/models/inherited_model.json",
+        "script-import-sample-data": "scripts/sample_data.yaml",
+        "elasticsearch": {
+            "version": "v7",
+            "templates": {
+                "v7": {
+                    "mappings": {
+                        "properties": {}
+                    }
+                }
+            }
+        }
+    },
+    "output-directory": "model"
+}
