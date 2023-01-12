@@ -35,7 +35,6 @@ model/services/config.py
 model/services/facets.py
 model/services/max_facet.py
 model/services/permissions.py
-model/services/pokus.py
 model/services/schema.py
 model/services/search.py
 model/services/service.py

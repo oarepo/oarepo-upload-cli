@@ -17,7 +17,8 @@ class AuthenticationTokenParser:
         Tries to retrieve the token from all possible sources:
         - command line argument
         - ini file in the current directory
-        - ini file in the home directory
+        - hidden ini file in the home directory
+        - ini file in the .config directory in the home directory
 
         If not present anywhere, returns None.
         """
@@ -29,9 +30,14 @@ class AuthenticationTokenParser:
             # ini file present in the current directory
             return self.__get_token(path)
 
-        path = f'{os.environ["HOME"]}/{self.ini_file_name}'
+        path = f'{os.environ["HOME"]}/.{self.ini_file_name}'
         if os.path.isfile(path):
             # ini file present in the home directory
+            return self.__get_token(path)
+
+        path = f'{os.environ["HOME"]}/.config/.{self.ini_file_name}'
+        if os.path.isfile(path):
+            # ini file present in the .config directory in the home directory
             return self.__get_token(path)
 
     def __get_token(self, path):

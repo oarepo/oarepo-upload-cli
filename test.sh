@@ -5,7 +5,7 @@ pip install -e tests/model[tests]
 invenio index init --force
 invenio db create
 
-invenio run 2>&1 > tmp.error.log &
+invenio run --cert test.crt --key test.key 2>&1 > tmp.error.log &
 invenio_pid=$!
 
 sleep 10

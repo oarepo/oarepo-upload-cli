@@ -4,7 +4,7 @@ import os
 from ..oarepo_upload_cli.authentication_token_parser import AuthenticationTokenParser
 
 @pytest.mark.parametrize('token_arg,expected', [('arg1', 'arg1'), ('arg2', 'arg2')])
-def should_parse_token_arg(token_arg, expected):
+def test_parse_token_arg(token_arg, expected):
     """
     Tests correct parsing of a token passed as a command line argument.
     """
@@ -13,7 +13,7 @@ def should_parse_token_arg(token_arg, expected):
 
     assert result == expected
 
-current_dir, home_dir = '.', os.environ['HOME']
+current_dir, home_dir, config_home_dir = '.', os.environ['HOME'], f'{os.environ["HOME"]}/.config'
 file_name = 'oarepo_upload.ini'
 
 def create_file(directory, token):
@@ -26,39 +26,47 @@ def create_file(directory, token):
 def remove_file(directory):
     os.remove(f'{directory}/{file_name}')
 
-@pytest.mark.parametrize('token_arg,expected', [('curr_dir1', 'curr_dir1'), ('curr_dir2', 'curr_dir2')])
-def should_parse_ini_current_dir(token_arg, expected):
+@pytest.mark.parametrize('token,expected', [('curr_dir1', 'curr_dir1'), ('curr_dir2', 'curr_dir2')])
+def test_parse_ini_current_dir(token, expected):
     """
     Tests correct parsing of a token written in an ini file located in the current directory.
     """
-    create_file(current_dir, token_arg)
 
-    token_parser = AuthenticationTokenParser(token_arg)
+    create_file(current_dir, token)
+
+    token_parser = AuthenticationTokenParser()
     result = token_parser.parse()
 
     assert result == expected
 
     remove_file(current_dir)
     
-home_dir = os.environ['HOME']
-
-@pytest.mark.parametrize('token_arg,expected', [('home_dir1', 'home_dir1'), ('home_dir2', 'home_dir2')])
-def should_parse_ini_home_dir(token_arg, expected):
+@pytest.mark.parametrize('token,expected', [('home_dir1', 'home_dir1'), ('home_dir2', 'home_dir2')])
+def test_parse_ini_home_dir(token, expected):
     """
     Tests correct parsing of a token written in an ini file located in the home directory.
     """
-    create_file(home_dir, token_arg)
 
-    token_parser = AuthenticationTokenParser(token_arg)
+    create_file(home_dir, token)
+
+    token_parser = AuthenticationTokenParser()
     result = token_parser.parse()
 
     assert result == expected
 
     remove_file(home_dir)
 
-@pytest.mark.parametrize('token_arg,expected', [('none_token1', None), ('none_token2', None)])
-def should_return_none_arg(token_arg, expected):
-    token_parser = AuthenticationTokenParser(token_arg)
+@pytest.mark.parametrize('token,expected', [('config_home_dir1', 'config_home_dir1'), ('config_home_dir2', 'config_home_dir2')])
+def test_parse_ini_config_home_dir(token, expected):
+    """
+    Tests correct parsing of a token written in an ini file located in the config directory in the home directory.
+    """
+
+    create_file(config_home_dir, token)
+
+    token_parser = AuthenticationTokenParser()
     result = token_parser.parse()
 
     assert result == expected
+
+    remove_file(config_home_dir)
