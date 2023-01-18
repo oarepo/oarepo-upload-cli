@@ -1,7 +1,7 @@
 import pytest
 import os
 
-from ..oarepo_upload_cli.authentication_token_parser import AuthenticationTokenParser
+from oarepo_upload_cli.authentication_token_parser import AuthenticationTokenParser
 
 @pytest.mark.parametrize('token_arg,expected', [('arg1', 'arg1'), ('arg2', 'arg2')])
 def test_parse_token_arg(token_arg, expected):

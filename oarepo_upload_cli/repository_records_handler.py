@@ -2,8 +2,8 @@ from http import HTTPStatus
 import requests
 from typing import Optional
 
-from abstract_record import AbstractRecord
-from exceptions import ExceptionMessage, RepositoryCommunicationException
+from oarepo_upload_cli.abstract_record import AbstractRecord
+from oarepo_upload_cli.exceptions import ExceptionMessage, RepositoryCommunicationException
 
 class RepositoryRecordsHandler:
     def __init__(self, collection_url: str):

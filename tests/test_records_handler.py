@@ -1,6 +1,7 @@
 import requests
 
-from ..oarepo_upload_cli.repository_records_handler import RepositoryRecordsHandler
+from oarepo_upload_cli.repository_records_handler import RepositoryRecordsHandler
+from test_record import TestRecord
 
 headers = { "Content-Type": "application/json" }
 url = 'https://localhost:5000/api/model/'
@@ -10,9 +11,9 @@ def test_create():
 
     # ARRANGE
     # -------
-    record1 = { 'metadata': { 'updated': '2022-11-02' } }
-    record2 = { 'metadata': { 'updated': '2015-10-13' } }
-    record3 = { 'metadata': { 'updated': '2019-03-30' } }
+    record1 = TestRecord('2022-11-02')
+    record2 = TestRecord('2015-10-13')
+    record3 = TestRecord('2019-03-30')
     records = [record1, record2, record3]
 
     # ACT
@@ -38,11 +39,11 @@ def test_upload():
 
     # ARRANGE
     # -------
-    record_previous = { 'metadata': { 'updated': '2001-03-07' } }
+    record_previous = TestRecord('2001-03-07')
     created_record_url = records_handler.create_record(record_previous)
 
     new_updated = '2001-03-08'
-    record_new = { 'metadata': { 'updated': new_updated } }
+    record_new = TestRecord(new_updated)
 
     # ACT
     # ---

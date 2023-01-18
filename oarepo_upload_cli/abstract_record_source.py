@@ -2,7 +2,7 @@ import abc
 from datetime import datetime
 from typing import Iterable
 
-from abstract_record import AbstractRecord
+from oarepo_upload_cli.abstract_record import AbstractRecord
 
 class AbstractRecordSource(metaclass=abc.ABCMeta):
     """

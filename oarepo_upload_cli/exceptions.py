@@ -1,4 +1,4 @@
-from enum import StrEnum
+from enum import Enum
 
 class EntryPointNotFoundException(Exception):
     """
@@ -12,7 +12,7 @@ class RepositoryCommunicationException(Exception):
     """    
     pass
 
-class ExceptionMessage(StrEnum):
+class ExceptionMessage(Enum):
     """
     Collection of string representing exception error messages.
     """

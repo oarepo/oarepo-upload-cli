@@ -6,7 +6,7 @@ class AuthenticationTokenParser:
     """
     Unificator of token parsing from different sources.
     """
-    def __init__(self, token_arg: Optional[str]):
+    def __init__(self, token_arg: Optional[str] = None):
         self.token_arg = token_arg
         self.ini_group = 'authentication'
         self.ini_token = 'token'
