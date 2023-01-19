@@ -6,3 +6,6 @@ class TestRecord(AbstractRecord):
 
     def get_metadata(self):
         return { "updated": self.updated }
+
+    def id(self):
+        return super().id

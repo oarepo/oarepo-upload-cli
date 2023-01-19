@@ -14,6 +14,7 @@ def test_create():
     record1 = TestRecord('2022-11-02')
     record2 = TestRecord('2015-10-13')
     record3 = TestRecord('2019-03-30')
+
     records = [record1, record2, record3]
 
     # ACT
@@ -21,6 +22,8 @@ def test_create():
     created_records_urls = []
     for record in records:
         created_url = records_handler.upload_record(record)
+        record.id = created_url
+        
         created_records_urls.append(created_url)
 
     # ASSERT
@@ -41,6 +44,7 @@ def test_upload():
     # -------
     record_previous = TestRecord('2001-03-07')
     created_record_url = records_handler.create_record(record_previous)
+    record_previous.id = created_record_url
 
     new_updated = '2001-03-08'
     record_new = TestRecord(new_updated)
@@ -48,6 +52,7 @@ def test_upload():
     # ACT
     # ---
     uploaded_record_url = records_handler.upload_record(record_new)
+    record_new.id = uploaded_record_url
 
     # ASSERT
     # ------

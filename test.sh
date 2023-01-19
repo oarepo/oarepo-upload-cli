@@ -11,6 +11,6 @@ invenio_pid=$!
 sleep 10
 
 # requests
-pytest tests
+pytest tests/model_tests
 
 kill $invenio_pid
