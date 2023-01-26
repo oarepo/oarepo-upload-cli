@@ -5,6 +5,9 @@ from oarepo_upload_cli.abstract_record_source import AbstractRecordSource
 from test_record import TestRecord
 
 class TestSource(AbstractRecordSource):
+    # prevent pytest from trying to discover tests in the class
+    __test__ = False
+
     def __init__(self, n_samples: int):
         self.n_samples = n_samples
 
