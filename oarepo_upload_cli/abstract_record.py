@@ -1,14 +1,15 @@
 import abc
 
 class AbstractRecord(metaclass=abc.ABCMeta):
+    """
+    Interface for a concrete record.
+    """
+
     @abc.abstractmethod
     def __init__(self, updated: str, id: str = None):
         self._updated = updated
         self._id = id
 
-    """
-    Interface for a concrete record.
-    """
     @abc.abstractmethod
     def get_metadata(self):
         """

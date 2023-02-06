@@ -8,8 +8,9 @@ from exceptions import EntryPointNotFoundException, ExceptionMessage
 class EntryPointsLoader():
     def load_abstract_record_source(self, source_name_arg: str=None) -> AbstractRecordSource:
         """
+        Tries to load an entry point that represents record source.
         """
-        group, name = 'oarepo_upload_cli.dependencies', 'oarepo_upload_test_source'
+        group, name = 'oarepo_upload_cli.dependencies', 'oarepo_upload_source'
 
         ep_record_source = self.__load(group, name, source_name_arg)
 
@@ -21,8 +22,9 @@ class EntryPointsLoader():
     
     def load_abstract_record(self, record_arg_name: str=None) -> AbstractRecord:
         """
+        Tries to load an entry point that represents record.
         """
-        group, name = 'oarepo_upload_cli.dependencies', 'oarepo_upload_test_record'
+        group, name = 'oarepo_upload_cli.dependencies', 'oarepo_upload_record'
 
         ep_record = self.__load(group, name, record_arg_name)
 
@@ -32,8 +34,6 @@ class EntryPointsLoader():
         return ep_record.load()
 
     def __load(self, group: str, name: str, arg_name: str=None) -> Any | None:
-        """
-        """
         eps = importlib_metadata.entry_points().select(group=group, name=name)
 
         if not eps:
