@@ -1,3 +1,4 @@
+import pytest
 import requests
 
 from oarepo_upload_cli.repository_records_handler import RepositoryRecordsHandler
@@ -5,6 +6,21 @@ from test_record import TestRecord
 
 headers = { "Content-Type": "application/json" }
 url = 'https://localhost:5000/api/model/'
+
+@pytest.fixture(autouse=True)
+def run_before_and_after_tests():
+    yield
+
+    get_records_response = requests.get(url=url, headers=headers, verify=False)
+    get_records_response.raise_for_status()
+
+    get_records_response_payload = get_records_response.json()
+    hits_ids = [hit['id'] for hit in get_records_response_payload['hits']['hits']]
+
+
+    for record_id in hits_ids:
+        response = requests.delete(url=f'{url}{record_id}', headers=headers, verify=False)
+        response.raise_for_status()
 
 def test_create():
     records_handler = RepositoryRecordsHandler(collection_url=url)
@@ -19,53 +35,49 @@ def test_create():
 
     # ACT
     # ---
-    created_records_urls = []
-    for record in records:
-        created_url = records_handler.upload_record(record)
-        record.id = created_url
-        
-        created_records_urls.append(created_url)
-
+    created_ids = [records_handler.upload_record(record) for record in records]
+    
     # ASSERT
     # ------
-
-    response = requests.get(url=url, headers=headers)
+    response = requests.get(url=url, headers=headers, verify=False)
     response.raise_for_status()
 
-    repo_created_links = [hit['links']['self'] for hit in response['hits']['hits']]
+    response_payload = response.json()
 
-    assert len(created_records_urls) == len(repo_created_links)
-    assert all([a == b for a, b in zip(sorted(created_records_urls), sorted(repo_created_links))])
+    hits_ids = [hit['id'] for hit in response_payload['hits']['hits']]
+
+    assert len(created_ids) == len(hits_ids)
+    assert all([a == b for a, b in zip(sorted(created_ids), sorted(hits_ids))])
 
 def test_upload():
-    records_handler = RepositoryRecordsHandler(collection_url=url)
-
     # ARRANGE
     # -------
+    records_handler = RepositoryRecordsHandler(collection_url=url)
+
     record_previous = TestRecord('2001-03-07')
-    created_record_url = records_handler.create_record(record_previous)
-    record_previous.id = created_record_url
+    record_previous.id = records_handler.upload_record(record_previous)
 
     new_updated = '2001-03-08'
     record_new = TestRecord(new_updated)
+    record_new.id = record_previous.id
 
     # ACT
     # ---
-    uploaded_record_url = records_handler.upload_record(record_new)
-    record_new.id = uploaded_record_url
+    record_new.id = records_handler.upload_record(record_new)
 
     # ASSERT
     # ------
 
     # modified the same record
-    assert created_record_url == uploaded_record_url
+    assert record_new.id == record_previous.id
     
-    query_params = { 'id': created_record_url }
-    response = requests.get(url=url, headers=headers, params=query_params)
+    response = requests.get(url=f'{url}{record_previous.id}', headers=headers, verify=False)
     response.raise_for_status()
 
+    response_payload = response.json()
+
     # its the same record
-    assert response['links']['self'] == uploaded_record_url
+    assert response_payload['id'] == record_new.id
 
     # field updated was modified correctly
-    assert response['metadata']['upadted'] == new_updated
+    assert response_payload['metadata']['updated'] == new_updated

@@ -9,7 +9,7 @@ class TestRecord(AbstractRecord):
         self._id = id
 
     def get_metadata(self):
-        return { "updated": self._updated }
+        return { "metadata": { "updated": self._updated } }
 
     @property
     def id(self):

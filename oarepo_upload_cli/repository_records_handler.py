@@ -18,30 +18,33 @@ class RepositoryRecordsHandler:
         Uploads a record to the repository with metadata given by the record parameter.
         If already present, modifies the content.
         """
+        
+        if not record.id:
+            return self._create_record(record)
 
+        item_url = f'{self.collection_url}{record.id}'
         metadata = record.get_metadata()
 
         try:
-            response = requests.put(url=self.collection_url, headers=self.headers, data=metadata, verify=False)
+            response = requests.put(url=item_url, headers=self.headers, json=metadata, verify=False)
         except requests.ConnectionError as conn_err:
             raise RepositoryCommunicationException(ExceptionMessage.ConnectionError) from conn_err
         except Exception as err:
             raise RepositoryCommunicationException() from err
 
         if response.status_code == HTTPStatus.NOT_FOUND.value:
-            return self.create_record(record)
+            return self._create_record(record)
         else:
             try:
                 response.raise_for_status()
             except requests.HTTPError as http_err:
                 raise RepositoryCommunicationException(ExceptionMessage.HTTPError) from http_err
 
-            assert 'links' in response.headers and 'self' in response.headers['links']
+            response_payload = response.json()
+            
+            return response_payload['id']
 
-            # the url of the created record
-            return response.headers['links']['self']
-
-    def create_record(self, record: AbstractRecord) -> Optional[str]:
+    def _create_record(self, record: AbstractRecord) -> Optional[str]:
         """
         Creates a record in the repository with metadata given by the record parameter.
         """
@@ -49,7 +52,7 @@ class RepositoryRecordsHandler:
         metadata = record.get_metadata()
 
         try:
-            response = requests.post(url=self.collection_url, headers=self.headers, data=metadata, verify=False)
+            response = requests.post(url=self.collection_url, headers=self.headers, json=metadata, verify=False)
 
             response.raise_for_status()
         except requests.ConnectionError as conn_err:
@@ -59,10 +62,9 @@ class RepositoryRecordsHandler:
         except Exception as err:
             raise RepositoryCommunicationException() from err
 
-        assert 'links' in response.headers and 'self' in response.headers['links']
+        response_payload = response.json()
 
-        # the url of the created record
-        return response.headers['links']['self']
+        return response_payload['id']
 
         
 
