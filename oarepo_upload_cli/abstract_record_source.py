@@ -8,6 +8,7 @@ class AbstractRecordSource(metaclass=abc.ABCMeta):
     """
     Interface for concrete record source that generates records.
     """
+    
     @abc.abstractmethod
     def get_records(self, modified_after: datetime=None, modified_before: datetime=None) -> Iterable[AbstractRecord]:
         """
