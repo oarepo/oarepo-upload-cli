@@ -1,29 +1,33 @@
-import abc
+from abc import ABC, abstractmethod
 
-class AbstractRecord(metaclass=abc.ABCMeta):
+class AbstractRecord(ABC):
     """
-    Interface for a concrete record.
+    Describes a concrete record.
     """
 
-    @abc.abstractmethod
+    @abstractmethod
     def __init__(self, updated: str, id: str = None):
         self._updated = updated
         self._id = id
 
-    @abc.abstractmethod
+    @abstractmethod
     def get_metadata(self):
         """
-        Returns metadada serializable to JSON in the format that is acceptable by the repository.
+        Returns a metadata serializable to JSON acceptable by a repository.
         """
 
     @property
-    @abc.abstractmethod
+    @abstractmethod
     def id(self):
         """
+        Returns the record's ID.
         """
+        
+        return self._id
 
     @id.setter
-    @abc.abstractmethod
+    @abstractmethod
     def id(self, value):
         """
+        Sets the given value as a new value of the record's ID.
         """

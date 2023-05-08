@@ -1,20 +1,25 @@
 from configparser import ConfigParser
+from dataclasses import dataclass
 import os
 from typing import Optional
+
+@dataclass
+class AuthenticationTokenParserConfig:
+    ini_group: str
+    ini_token: str
+    ini_file_name: str
 
 class AuthenticationTokenParser:
     """
     Unificator of token parsing from different sources.
     """
-    def __init__(self, token_arg: Optional[str] = None):
-        self.token_arg = token_arg
-        self.ini_group = 'authentication'
-        self.ini_token = 'token'
-        self.ini_file_name = 'oarepo_upload.ini'
+    def __init__(self, config: AuthenticationTokenParserConfig, token_arg: Optional[str] = None):
+        self._token_arg = token_arg
+        self._config = config
 
-    def parse(self):
+    def get_token(self):
         """
-        Tries to retrieve the token from all possible sources:
+        Tries to retrieve the token from possible sources:
         - command line argument
         - ini file in the current directory
         - hidden ini file in the home directory
@@ -22,26 +27,23 @@ class AuthenticationTokenParser:
 
         If not present anywhere, returns None.
         """
-        if self.token_arg:
-            return self.token_arg
+        if self._token_arg:
+            return self._token_arg
 
-        path = self.ini_file_name
-        if os.path.isfile(path):
-            # ini file present in the current directory
-            return self.__get_token(path)
+        possible_token_locations = [
+            self._config.ini_file_name,                                   # current dir
+            f'{os.environ["HOME"]}/.{self._config.ini_file_name}',        # home dir
+            f'{os.environ["HOME"]}/.config/.{self._config.ini_file_name}' # .config dir
+        ]
 
-        path = f'{os.environ["HOME"]}/.{self.ini_file_name}'
-        if os.path.isfile(path):
-            # ini file present in the home directory
-            return self.__get_token(path)
-
-        path = f'{os.environ["HOME"]}/.config/.{self.ini_file_name}'
-        if os.path.isfile(path):
-            # ini file present in the .config directory in the home directory
-            return self.__get_token(path)
+        for ini_file_path in possible_token_locations:
+            if os.path.isfile(ini_file_path):
+                return self.__get_token(ini_file_path)
+        
+        return None
 
     def __get_token(self, path):
         config_parser = ConfigParser()
         config_parser.read(path)
         
-        return config_parser.get(self.ini_group, self.ini_token, fallback=None)
+        return config_parser.get(self._config.ini_group, self._config.ini_token, fallback=None)

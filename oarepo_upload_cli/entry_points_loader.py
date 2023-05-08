@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 import importlib_metadata
 from typing import Any
 
@@ -5,28 +6,34 @@ from abstract_record import AbstractRecord
 from abstract_record_source import AbstractRecordSource
 from exceptions import EntryPointNotFoundException, ExceptionMessage
 
+@dataclass
+class EntryPointsLoaderConfig:
+    group: str
+    record_source_name: str
+    record_name: str
+
 class EntryPointsLoader():
+    def __init__(self, config: EntryPointsLoaderConfig):
+        self._config = config
+    
     def load_abstract_record_source(self, source_name_arg: str=None) -> AbstractRecordSource:
         """
         Tries to load an entry point that represents record source.
         """
-        group, name = 'oarepo_upload_cli.dependencies', 'oarepo_upload_source'
-
-        ep_record_source = self.__load(group, name, source_name_arg)
+        
+        ep_record_source = self.__load(self._config.group, self._config.record_source_name, source_name_arg)
 
         if not ep_record_source:
             raise EntryPointNotFoundException(ExceptionMessage.AbstractSourceNotFound)
         
         return ep_record_source.load()
-
     
     def load_abstract_record(self, record_arg_name: str=None) -> AbstractRecord:
         """
         Tries to load an entry point that represents record.
         """
-        group, name = 'oarepo_upload_cli.dependencies', 'oarepo_upload_record'
-
-        ep_record = self.__load(group, name, record_arg_name)
+        
+        ep_record = self.__load(self._config.group, self._config.record_name, record_arg_name)
 
         if not ep_record:
             raise EntryPointNotFoundException(ExceptionMessage.AbstractRecordNotFound)

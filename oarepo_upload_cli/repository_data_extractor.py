@@ -15,8 +15,8 @@ class RepositoryDataExtractor:
     """
 
     def __init__(self, url: str, token: str):
-        self.url = url
-        self.token = token
+        self._url = url
+        self._token = token
 
     def get_data(self, path: Path) -> Any | None:
         """
@@ -26,7 +26,7 @@ class RepositoryDataExtractor:
         """
 
         try:
-            response = requests.get(self.url, auth=BearerAuthentication(self.token))
+            response = requests.get(self._url, auth=BearerAuthentication(self._token))
 
             response.raise_for_status()
         except requests.ConnectionError as conn_err:
