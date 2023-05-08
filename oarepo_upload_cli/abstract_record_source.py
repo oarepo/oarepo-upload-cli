@@ -1,23 +1,23 @@
-import abc
+from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Iterable
 
 from oarepo_upload_cli.abstract_record import AbstractRecord
 
-class AbstractRecordSource(metaclass=abc.ABCMeta):
+class AbstractRecordSource(ABC):
     """
-    Interface for concrete record source that generates records.
+    Describes a source that is used to generate records.
     """
     
-    @abc.abstractmethod
+    @abstractmethod
     def get_records(self, modified_after: datetime=None, modified_before: datetime=None) -> Iterable[AbstractRecord]:
         """
-        Generator returning records of type AbstractRecord limited by given timestamps.
-        If no timestamps are provided, returns all records.
+        Provides a generator that returns records within given timestamps.
+        If no timestamps are given, returns all records.
         """
 
-    @abc.abstractmethod
+    @abstractmethod
     def get_records_count(self, modified_after: datetime=None, modified_before: datetime=None) -> int:
         """
-        Approximate size of the collection of records returned.
+        Approximates the size of a collection of records being returned.
         """

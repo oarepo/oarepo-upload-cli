@@ -1,10 +1,12 @@
 import click
+from dotenv import load_dotenv
+import os
 from tqdm import tqdm
 
-from authentication_token_parser import AuthenticationTokenParser
+from authentication_token_parser import AuthenticationTokenParser, AuthenticationTokenParserConfig
 from repository_data_extractor import RepositoryDataExtractor
 from repository_records_handler import RepositoryRecordsHandler
-from entry_points_loader import EntryPointsLoader
+from entry_points_loader import EntryPointsLoaderConfig, EntryPointsLoader
 
 @click.command()
 @click.option('--collection_url', help="Concrete collection URL address to synchronize records.")
@@ -14,19 +16,56 @@ from entry_points_loader import EntryPointsLoader
 @click.option('--modified_before', help="Timestamp that represents date before modification.")
 @click.option('--token', help="SIS bearer authentication token.")
 def main(collection_url, record_path, source_path, modified_after, modified_before, token) -> None:
-    token_parser = AuthenticationTokenParser(token)
-    token = token_parser.parse()
-    if not token:
-        print('Token is missing.')
+    # -------------------------
+    # - Environment variables -
+    # -------------------------
+    try:
+        # Ensure that environment variables are present and loaded.
+        load_dotenv()
+    except IOError as e:
+        print(e)
+        
         return
 
+    # ---------------------------
+    # - Authentication (Bearer) -
+    # ---------------------------
+    token_parser_config = AuthenticationTokenParserConfig(
+        ini_group=os.getenv('AUTHENTICATION_INI_GROUP'),
+        ini_token=os.getenv('AUTHENTICATION_INI_TOKEN'),
+        ini_file_name=os.getenv('AUTHENTICATION_INI_FILE')
+    )
+    token_parser = AuthenticationTokenParser(token_parser_config, token)
+    if token := token_parser.get_token():
+        print('Bearer token is missing.')
+        
+        return
+
+    # ----------------
+    # - Entry points -
+    # ----------------
+    ep_config = EntryPointsLoaderConfig(
+        group=os.getenv('ENTRY_POINTS_GROUP'),
+        record_source_name=os.getenv('ENTRY_POINTS_RECORD_NAME'),
+        record_name=os.getenv('ENTRY_POINTS_RECORD_SOURCE_NAME')
+    )
+    ep_loader = EntryPointsLoader(config=ep_config)
+    record = ep_loader.load_abstract_record(record_arg_name=record_path)
+    source = ep_loader.load_abstract_record_source(source_name_arg=source_path)
+
+    # --------------
+    # - Timestamps -
+    # --------------
+    if not modified_before:
+        print('Modify before timestamp is required.')
+        
+        return
+    
     if not modified_after:
         repo_data_extractor = RepositoryDataExtractor(collection_url, token)
         modified_after = repo_data_extractor.get_data(path=["aggregations", "max_date", "value"])
 
-    ep_loader = EntryPointsLoader()
-    record = ep_loader.load_abstract_record(record_arg_name=record_path)
-    source = ep_loader.load_abstract_record_source(source_name_arg=source_path)
+    
 
     approximate_records_count = source.get_records_count(modified_after, modified_before)
     if not approximate_records_count:
