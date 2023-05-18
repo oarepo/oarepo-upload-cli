@@ -1,12 +1,14 @@
+from datetime import datetime
+
 import click
 from dotenv import load_dotenv
 import os
 from tqdm import tqdm
 
-from authentication_token_parser import AuthenticationTokenParser, AuthenticationTokenParserConfig
-from repository_data_extractor import RepositoryDataExtractor
-from repository_records_handler import RepositoryRecordsHandler
-from entry_points_loader import EntryPointsLoaderConfig, EntryPointsLoader
+from oarepo_upload_cli.authentication_token_parser import AuthenticationTokenParser, AuthenticationTokenParserConfig
+from oarepo_upload_cli.repository_data_extractor import RepositoryDataExtractor
+from oarepo_upload_cli.repository_records_handler import RepositoryRecordsHandler
+from oarepo_upload_cli.entry_points_loader import EntryPointsLoaderConfig, EntryPointsLoader
 
 @click.command()
 @click.option('--collection_url', help="Concrete collection URL address to synchronize records.")
@@ -36,7 +38,7 @@ def main(collection_url, record_path, source_path, modified_after, modified_befo
         ini_file_name=os.getenv('AUTHENTICATION_INI_FILE')
     )
     token_parser = AuthenticationTokenParser(token_parser_config, token)
-    if token := token_parser.get_token():
+    if not(token := token_parser.get_token()):
         print('Bearer token is missing.')
         
         return
@@ -45,7 +47,7 @@ def main(collection_url, record_path, source_path, modified_after, modified_befo
     # - Entry points -
     # ----------------
     ep_config = EntryPointsLoaderConfig(
-        group=os.getenv('ENTRY_POINTS_GROUP'),
+        group=os.getenv('ENTRY_POINTS_GROUP', 'oarepo_upload_cli'),
         record_source_name=os.getenv('ENTRY_POINTS_RECORD_NAME'),
         record_name=os.getenv('ENTRY_POINTS_RECORD_SOURCE_NAME')
     )
@@ -57,15 +59,12 @@ def main(collection_url, record_path, source_path, modified_after, modified_befo
     # - Timestamps -
     # --------------
     if not modified_before:
-        print('Modify before timestamp is required.')
-        
-        return
-    
+        # set modified before to current datetime
+        modified_before = datetime.utcnow().isoformat()
+
     if not modified_after:
         repo_data_extractor = RepositoryDataExtractor(collection_url, token)
         modified_after = repo_data_extractor.get_data(path=["aggregations", "max_date", "value"])
-
-    
 
     approximate_records_count = source.get_records_count(modified_after, modified_before)
     if not approximate_records_count:

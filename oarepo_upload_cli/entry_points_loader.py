@@ -2,9 +2,9 @@ from dataclasses import dataclass
 import importlib_metadata
 from typing import Any
 
-from abstract_record import AbstractRecord
-from abstract_record_source import AbstractRecordSource
-from exceptions import EntryPointNotFoundException, ExceptionMessage
+from .abstract_record import AbstractRecord
+from .abstract_record_source import AbstractRecordSource
+from .exceptions import EntryPointNotFoundException, ExceptionMessage
 
 @dataclass
 class EntryPointsLoaderConfig:
@@ -25,8 +25,9 @@ class EntryPointsLoader():
 
         if not ep_record_source:
             raise EntryPointNotFoundException(ExceptionMessage.AbstractSourceNotFound)
-        
-        return ep_record_source.load()
+
+        record_source_class = ep_record_source.load()
+        return record_source_class()
     
     def load_abstract_record(self, record_arg_name: str=None) -> AbstractRecord:
         """
@@ -41,25 +42,9 @@ class EntryPointsLoader():
         return ep_record.load()
 
     def __load(self, group: str, name: str, arg_name: str=None) -> Any | None:
-        eps = importlib_metadata.entry_points().select(group=group, name=name)
-
-        if not eps:
-            raise ValueError(ExceptionMessage.EntryPointNotProvided)
-        
-        if len(eps) == 1 and not arg_name:
-            # user requested the same entry point as it is defined
-            return eps[0]
-        
-        if len(eps) == 1 and arg_name and eps[0].name != arg_name:
-            # user requested an entry point that is not loaded
-            raise EntryPointNotFoundException(ExceptionMessage.EntryPointNotProvided)
-
-        if not arg_name:
-            raise ValueError(ExceptionMessage.MultipleEntryPoints)
-    
+        eps = importlib_metadata.entry_points(group=group)
         for ep in eps:
-            if ep.name == arg_name:
+            if ep.name == arg_name or name:
                 return ep
-            
-        return None
-    
+
+        raise ValueError(ExceptionMessage.EntryPointNotProvided)
