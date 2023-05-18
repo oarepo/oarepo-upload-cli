@@ -3,8 +3,8 @@ from json import JSONDecodeError
 import requests
 from typing import Any, Deque
 
-from exceptions import ExceptionMessage, RepositoryCommunicationException
-from token_auth import BearerAuthentication
+from .exceptions import ExceptionMessage, RepositoryCommunicationException
+from .token_auth import BearerAuthentication
 
 Path = list[str]
 ResponseContent = dict

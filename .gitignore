@@ -1,3 +1,4 @@
 build
 oarepo_upload_cli.egg-info
 __pycache__
+.idea
