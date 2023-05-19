@@ -10,6 +10,8 @@ from oarepo_upload_cli.authentication_token_parser import AuthenticationTokenPar
 from oarepo_upload_cli.repository_data_extractor import RepositoryDataExtractor
 from oarepo_upload_cli.repository_records_handler import RepositoryRecordsHandler
 from oarepo_upload_cli.entry_points_loader import EntryPointsLoaderConfig, EntryPointsLoader
+from oarepo_upload_cli.token_auth import BearerAuthentication
+
 
 @click.command()
 @click.option('--collection_url', help="Concrete collection URL address to synchronize records.")
@@ -72,7 +74,7 @@ def main(collection_url, record_path, source_path, modified_after, modified_befo
         print(f'All records are up to the given date: {modified_after}')
         return
 
-    repo_handler = RepositoryRecordsHandler(collection_url)
+    repo_handler = RepositoryRecordsHandler(collection_url, auth=BearerAuthentication(token))
     records = tqdm(source.get_records(modified_after, modified_before), total=approximate_records_count, disable=None)
     for record in records:
         # Get repository version of this record.

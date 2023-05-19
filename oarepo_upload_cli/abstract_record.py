@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod, abstractproperty
-from abstract_file import AbstractFile
-from abstract_metadata import AbstractMetadata
+from .abstract_file import AbstractFile
+from .abstract_metadata import AbstractMetadata
 from typing import List
 
 class AbstractRecord(ABC):
