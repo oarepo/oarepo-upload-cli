@@ -86,7 +86,7 @@ def main(collection_url, source, modified_after, modified_before, token) -> None
     metadata_config = MetadataConfig(
         modified_name=os.getenv('RECORD_METADATA_MODIFIED', 'dateModified')
     )
-    repo_handler = RepositoryRecordsHandler(metadata_config, collection_url, auth)
+    repo_handler = RepositoryRecordsHandler(collection_url, auth)
     source_records = tqdm(source.get_records(modified_after, modified_before), total=approximate_records_count, disable=None)
     for source_record in source_records:
         # Get the repository version of this record.
