@@ -30,16 +30,16 @@ class RepositoryDataExtractor:
 
             response.raise_for_status()
         except requests.ConnectionError as conn_err:
-            raise RepositoryCommunicationException(ExceptionMessage.ConnectionError) from conn_err
+            raise RepositoryCommunicationException(ExceptionMessage.ConnectionError, conn_err) from conn_err
         except requests.exceptions.HTTPError as http_err:
-            raise RepositoryCommunicationException(ExceptionMessage.HTTPError) from http_err
+            raise RepositoryCommunicationException(ExceptionMessage.HTTPError, http_err) from http_err
         except Exception as err:
-            raise RepositoryCommunicationException() from err
+            raise RepositoryCommunicationException(err) from err
         
         try:
             content = response.json()
         except JSONDecodeError as serialization_err:
-            raise RepositoryCommunicationException(ExceptionMessage.JSONContentNotSerializable) from serialization_err
+            raise RepositoryCommunicationException(ExceptionMessage.JSONContentNotSerializable, serialization_err) from serialization_err
         
         found, invalid_path_item = self.__check_path(content, deque(path))
         if not found:

@@ -52,9 +52,9 @@ class RepositoryRecordsHandler:
         try:
             response = requests.get(url=record_url, headers=self._headers, verify=False, auth=self._auth)
         except requests.ConnectionError as conn_err:
-            raise RepositoryCommunicationException(ExceptionMessage.ConnectionError) from conn_err
+            raise RepositoryCommunicationException(ExceptionMessage.ConnectionError, conn_err) from conn_err
         except Exception as err:
-            raise RepositoryCommunicationException() from err
+            raise RepositoryCommunicationException(err) from err
         
         if response.status_code == HTTPStatus.NOT_FOUND.value:
             return self._create_record(record)
@@ -76,9 +76,9 @@ class RepositoryRecordsHandler:
         try:
             response = requests.get(url=records_files_url, headers=self._headers, verify=False, auth=self._auth)
         except requests.ConnectionError as conn_err:
-            raise RepositoryCommunicationException(ExceptionMessage.ConnectionError) from conn_err
+            raise RepositoryCommunicationException(ExceptionMessage.ConnectionError, conn_err) from conn_err
         except Exception as err:
-            raise RepositoryCommunicationException() from err
+            raise RepositoryCommunicationException(err) from err
         
         if response.status_code != HTTPStatus.OK.value:
             response.raise_for_status()
@@ -95,9 +95,9 @@ class RepositoryRecordsHandler:
         try:
             response = requests.put(url=record_url, headers=self._headers, json=record.metadata, verify=False, auth=self._auth)
         except requests.ConnectionError as conn_err:
-            raise RepositoryCommunicationException(ExceptionMessage.ConnectionError) from conn_err
+            raise RepositoryCommunicationException(ExceptionMessage.ConnectionError, conn_err) from conn_err
         except Exception as err:
-            raise RepositoryCommunicationException() from err
+            raise RepositoryCommunicationException(err) from err
 
         if response.status_code == HTTPStatus.NOT_FOUND.value:
             raise ValueError()
@@ -105,7 +105,7 @@ class RepositoryRecordsHandler:
             try:
                 response.raise_for_status()
             except requests.HTTPError as http_err:
-                raise RepositoryCommunicationException(ExceptionMessage.HTTPError) from http_err
+                raise RepositoryCommunicationException(ExceptionMessage.HTTPError, http_err) from http_err
 
             response_payload = response.json()
             
@@ -125,9 +125,9 @@ class RepositoryRecordsHandler:
         try:
             response = requests.put(url=record_url, headers=self._headers, json=record.metadata, verify=False, auth=self._auth)
         except requests.ConnectionError as conn_err:
-            raise RepositoryCommunicationException(ExceptionMessage.ConnectionError) from conn_err
+            raise RepositoryCommunicationException(ExceptionMessage.ConnectionError, conn_err) from conn_err
         except Exception as err:
-            raise RepositoryCommunicationException() from err
+            raise RepositoryCommunicationException(err) from err
 
         if response.status_code == HTTPStatus.NOT_FOUND.value:
             return self._create_record(record)
@@ -135,7 +135,7 @@ class RepositoryRecordsHandler:
             try:
                 response.raise_for_status()
             except requests.HTTPError as http_err:
-                raise RepositoryCommunicationException(ExceptionMessage.HTTPError) from http_err
+                raise RepositoryCommunicationException(ExceptionMessage.HTTPError, http_err) from http_err
 
             response_payload = response.json()
             
@@ -195,13 +195,13 @@ class RepositoryRecordsHandler:
 
             response.raise_for_status()
         except requests.ConnectionError as conn_err:
-            raise RepositoryCommunicationException(ExceptionMessage.ConnectionError) from conn_err
+            raise RepositoryCommunicationException(ExceptionMessage.ConnectionError, conn_err) from conn_err
         except requests.HTTPError as http_err:
             print(http_err.response)
             
-            raise RepositoryCommunicationException(ExceptionMessage.HTTPError) from http_err
+            raise RepositoryCommunicationException(ExceptionMessage.HTTPError, http_err) from http_err
         except Exception as err:
-            raise RepositoryCommunicationException() from err
+            raise RepositoryCommunicationException(err) from err
         
         return response
 

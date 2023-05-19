@@ -10,7 +10,9 @@ class RepositoryCommunicationException(Exception):
     """
     Raised when there is a problem with requesting data from repository happens.
     """    
-    pass
+    
+    def __init__(self, error):
+        self._error = error
 
 class ExceptionMessage(Enum):
     """
