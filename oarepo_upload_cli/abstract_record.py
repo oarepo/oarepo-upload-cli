@@ -1,4 +1,7 @@
-from abc import ABC, abstractmethod
+from abc import ABC, abstractmethod, abstractproperty
+from abstract_file import AbstractFile
+from abstract_metadata import AbstractMetadata
+from typing import List
 
 class AbstractRecord(ABC):
     """
@@ -10,14 +13,17 @@ class AbstractRecord(ABC):
         self._updated = updated
         self._id = id
 
-    @abstractmethod
-    def get_metadata(self):
+    @abstractproperty
+    def metadata(self) -> AbstractMetadata:
         """
         Returns a metadata serializable to JSON acceptable by a repository.
         """
 
+    @abstractproperty
+    def files(self) -> List[AbstractFile]:
+        pass
+
     @property
-    @abstractmethod
     def id(self):
         """
         Returns the record's ID.
@@ -26,8 +32,9 @@ class AbstractRecord(ABC):
         return self._id
 
     @id.setter
-    @abstractmethod
     def id(self, value):
         """
         Sets the given value as a new value of the record's ID.
         """
+        
+        self._id = value

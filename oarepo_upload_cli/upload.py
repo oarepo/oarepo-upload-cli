@@ -1,6 +1,7 @@
 from datetime import datetime
 
 import click
+from datetime import datetime
 from dotenv import load_dotenv
 import os
 from tqdm import tqdm
@@ -71,10 +72,28 @@ def main(collection_url, record_path, source_path, modified_after, modified_befo
         print(f'All records are up to the given date: {modified_after}')
         return
 
-    handler = RepositoryRecordsHandler(collection_url)
+    repo_handler = RepositoryRecordsHandler(collection_url)
     records = tqdm(source.get_records(modified_after, modified_before), total=approximate_records_count, disable=None)
-    for rec in records:
-        handler.upload_record(rec)
+    for record in records:
+        # Get repository version of this record.
+        repository_record = repo_handler.get_record(record)
+        
+        # ------------
+        # - Metadata -
+        # ------------
+        last_metadata_modification = datetime.fromisoformat(repository_record['metadata']['updated'])
+        if modified_after <= last_metadata_modification <= modified_before:
+            # Metadata was updated, upload the new version.
+            repo_handler.upload_metadata(record)
+            
+        # ---------
+        # - Files -
+        # ---------
+        records_files = repo_handler.get_records_files(record)
+        for file in records_files:
+            last_file_modification = datetime.fromisoformat(file['updated'])
+            
+            # TODO
 
 if __name__ == "__main__":
     main()
