@@ -12,12 +12,11 @@ from oarepo_upload_cli.repository_records_handler import RepositoryRecordsHandle
 
 @click.command()
 @click.option('--collection_url', help="Concrete collection URL address to synchronize records.")
-@click.option('--record_path', help="Record entry point path.")
-@click.option('--source_path', help="Record source entry point path.")
+@click.option('--source', help="Record source entry point path.")
 @click.option('--modified_after', help="Timestamp that represents date after modification. If not specified, the last updated timestamp from repository will be used.")
 @click.option('--modified_before', help="Timestamp that represents date before modification.")
 @click.option('--token', help="SIS bearer authentication token.")
-def main(collection_url, record_path, source_path, modified_after, modified_before, token) -> None:
+def main(collection_url, source, modified_after, modified_before, token) -> None:
     # -------------------------
     # - Environment variables -
     # -------------------------
@@ -49,12 +48,10 @@ def main(collection_url, record_path, source_path, modified_after, modified_befo
     # ----------------
     ep_config = EntryPointsLoaderConfig(
         group=os.getenv('ENTRY_POINTS_GROUP', 'oarepo_upload_cli.dependencies'),
-        record_source_name=os.getenv('ENTRY_POINTS_RECORD_NAME', 'oarepo_upload_record'),
-        record_name=os.getenv('ENTRY_POINTS_RECORD_SOURCE_NAME', 'oarepo_upload_source')
+        source=os.getenv('ENTRY_POINTS_SOURCE', 'source'),
     )
     ep_loader = EntryPointsLoader(config=ep_config)
-    record = ep_loader.load_abstract_record(record_arg_name=record_path)
-    source = ep_loader.load_abstract_record_source(source_name_arg=source_path)
+    source = ep_loader.load_abstract_record_source(source_arg=source)
 
     # --------------
     # - Timestamps -
@@ -94,7 +91,7 @@ def main(collection_url, record_path, source_path, modified_after, modified_befo
         # - Files -
         # ---------
         source_record_files = source_record.files
-        repository_records_files = repo_handler.get_records_files(record)
+        repository_records_files = repo_handler.get_records_files(source_record)
         
         # Find identical files keys in both sources, update them.
         source_files_keys = {file.key for file in source_record_files}
@@ -106,12 +103,12 @@ def main(collection_url, record_path, source_path, modified_after, modified_befo
             last_repository_modification = datetime.fromisoformat(repository_file['updated'])
             if last_repository_modification < source_file.modified:
                 # Source's is newer, update.
-                repo_handler.upload_file(record, source_file)
+                repo_handler.upload_file(source_record, source_file)
                     
         # Find files that are in source but not yet in repo, upload them.
         for key in source_files_keys.difference(repository_files_keys):
             source_file = [file for file in source_record_files if file.key == key][0]
-            repo_handler.upload_file(record, source_file)
+            repo_handler.upload_file(source_record, source_file)
 
 if __name__ == "__main__":
     main()
