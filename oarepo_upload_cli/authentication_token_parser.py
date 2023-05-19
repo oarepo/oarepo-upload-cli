@@ -1,6 +1,7 @@
 from configparser import ConfigParser
 from dataclasses import dataclass
 import os
+from pathlib import Path
 from typing import Optional
 
 @dataclass
@@ -37,7 +38,7 @@ class AuthenticationTokenParser:
         ]
 
         for ini_file_path in possible_token_locations:
-            if os.path.isfile(ini_file_path):
+            if Path(ini_file_path).exists():
                 return self.__get_token(ini_file_path)
         
         return None

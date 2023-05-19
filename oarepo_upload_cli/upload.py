@@ -3,9 +3,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 import os
 from tqdm import tqdm
-from typing import Iterable
 
-from oarepo_upload_cli.abstract_record import AbstractRecord
 from oarepo_upload_cli.authentication_token_parser import AuthenticationTokenParser, AuthenticationTokenParserConfig
 from oarepo_upload_cli.token_auth import BearerAuthentication
 from oarepo_upload_cli.entry_points_loader import EntryPointsLoaderConfig, EntryPointsLoader
@@ -34,9 +32,9 @@ def main(collection_url, record_path, source_path, modified_after, modified_befo
     # - Authentication (Bearer) -
     # ---------------------------
     token_parser_config = AuthenticationTokenParserConfig(
-        ini_group=os.getenv('AUTHENTICATION_INI_GROUP'),
-        ini_token=os.getenv('AUTHENTICATION_INI_TOKEN'),
-        ini_file_name=os.getenv('AUTHENTICATION_INI_FILE')
+        ini_group=os.getenv('AUTHENTICATION_INI_GROUP', 'authentication'),
+        ini_token=os.getenv('AUTHENTICATION_INI_TOKEN', 'token'),
+        ini_file_name=os.getenv('AUTHENTICATION_INI_FILE', 'oarepo_upload.ini')
     )
     token_parser = AuthenticationTokenParser(token_parser_config, token)
     if not(token := token_parser.get_token()):
@@ -50,9 +48,9 @@ def main(collection_url, record_path, source_path, modified_after, modified_befo
     # - Entry points -
     # ----------------
     ep_config = EntryPointsLoaderConfig(
-        group=os.getenv('ENTRY_POINTS_GROUP', 'oarepo_upload_cli'),
-        record_source_name=os.getenv('ENTRY_POINTS_RECORD_NAME'),
-        record_name=os.getenv('ENTRY_POINTS_RECORD_SOURCE_NAME')
+        group=os.getenv('ENTRY_POINTS_GROUP', 'oarepo_upload_cli.dependencies'),
+        record_source_name=os.getenv('ENTRY_POINTS_RECORD_NAME', 'oarepo_upload_record'),
+        record_name=os.getenv('ENTRY_POINTS_RECORD_SOURCE_NAME', 'oarepo_upload_source')
     )
     ep_loader = EntryPointsLoader(config=ep_config)
     record = ep_loader.load_abstract_record(record_arg_name=record_path)
@@ -91,7 +89,7 @@ def main(collection_url, record_path, source_path, modified_after, modified_befo
         if modified_after <= last_metadata_modification <= modified_before:
             # Metadata was updated, upload the new version.
             repo_handler.upload_metadata(source_record)
-            
+        
         # ---------
         # - Files -
         # ---------
@@ -103,8 +101,13 @@ def main(collection_url, record_path, source_path, modified_after, modified_befo
         repository_files_keys = {file['key'] for file in repository_records_files}
         for key in source_files_keys.intersection(repository_files_keys):
             source_file = [file for file in source_record_files if file.key == key][0]
-            repo_handler.upload_file(record, source_file)
+            repository_file = [file for file in repository_records_files if file['key'] == key][0]
             
+            last_repository_modification = datetime.fromisoformat(repository_file['updated'])
+            if last_repository_modification < source_file.modified:
+                # Source's is newer, update.
+                repo_handler.upload_file(record, source_file)
+                    
         # Find files that are in source but not yet in repo, upload them.
         for key in source_files_keys.difference(repository_files_keys):
             source_file = [file for file in source_record_files if file.key == key][0]

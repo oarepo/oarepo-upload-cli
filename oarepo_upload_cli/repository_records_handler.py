@@ -116,24 +116,27 @@ class RepositoryRecordsHandler:
             
             return response_payload['id']
 
-    def upload_file(self, record: AbstractRecord, metadata: Dict):
+    def upload_file(self, record: AbstractRecord, file: AbstractFile):
         if not hasattr(record, 'id'):
-            raise AttributeError('Record is missing the \'id\' attribute.')
+            raise AttributeError('Record is missing the \'id\' property.')
         
-        # POST file metadata (a key).
+        # POST the file metadata (a key).
         post_files_url = f'{self._collection_url}{record.id}/files'
-        post_response = self._send_request('post', url=post_files_url, json=metadata, verify=False, auth=self._auth)
+        post_request_data = file.metadata()
+        
+        post_response = self._send_request('post', url=post_files_url, headers=self._headers, json=post_request_data, verify=False, auth=self._auth)
         
         if post_response.status_code != HTTPStatus.OK:
             # TODO: The file metadata was not uploaded correctly.
             
             return
         
-        post_reponse_payload = post_response.json()
+        # PUT content
+        put_content_url = f'{post_files_url}/{file.key}/content'
+        put_headers = { "Content-Type": file.content_type }    
+        put_request_data = file.get_reader()
         
-        # PUT content        
-        put_content_url = f'{post_files_url}/{metadata["key"]}/content'
-        put_response = self._send_request('put', put_content_url, file)
+        put_response = self._send_request('put', url=put_content_url, headers=put_headers, json=put_request_data, verify=False, auth=self._auth)
         
         if put_response.status_code != HTTPStatus.OK:
             # TODO: The file content was not uploaded correctly.
@@ -141,8 +144,9 @@ class RepositoryRecordsHandler:
             return
         
         # POST commit.
-        commit_url = f'{post_files_url}/{key}/commit'
-        commit_response = self._send_request('post', commit_url)
+        commit_url = f'{post_files_url}/{file.key}/commit'
+        
+        commit_response = self._send_request('post', url=commit_url, headers=self._headers, verify=False, auth=self._auth)
         
         if commit_response.status_code != HTTPStatus.OK:
             # TODO: The commit was not successful.
