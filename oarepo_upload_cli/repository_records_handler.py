@@ -17,6 +17,9 @@ class RepositoryRecordsHandler:
         self._collection_url = collection_url
         self._headers = { "Content-Type": "application/json" }
 
+    def delete_file(self, record: AbstractRecord, file: AbstractFile):
+        pass
+
     def get_record(self, record: AbstractRecord):
         """
         Returns a record from the repository given by the collection url based on the id attribute.
@@ -34,7 +37,10 @@ class RepositoryRecordsHandler:
         except Exception as err:
             raise RepositoryCommunicationException() from err
         
-        if response.status_code != HTTPStatus.OK:
+        if response.status_code == HTTPStatus.NOT_FOUND.value:
+            return self._create_record(record)
+        
+        if response.status_code != HTTPStatus.OK.value:
             response.raise_for_status()
         
         repository_record = response.json()
@@ -55,7 +61,7 @@ class RepositoryRecordsHandler:
         except Exception as err:
             raise RepositoryCommunicationException() from err
         
-        if response.status_code != HTTPStatus.OK:
+        if response.status_code != HTTPStatus.OK.value:
             response.raise_for_status()
             
         record_repository_files = response.json()
@@ -84,7 +90,7 @@ class RepositoryRecordsHandler:
 
             response_payload = response.json()
             
-            return response_payload['id']
+            return response_payload
             
     def upload_record(self, record: AbstractRecord) -> Optional[str]:
         """
@@ -114,7 +120,7 @@ class RepositoryRecordsHandler:
 
             response_payload = response.json()
             
-            return response_payload['id']
+            return response_payload
 
     def upload_file(self, record: AbstractRecord, file: AbstractFile):
         if not hasattr(record, 'id'):
@@ -126,7 +132,7 @@ class RepositoryRecordsHandler:
         
         post_response = self._send_request('post', url=post_files_url, headers=self._headers, json=post_request_data, verify=False, auth=self._auth)
         
-        if post_response.status_code != HTTPStatus.OK:
+        if post_response.status_code != HTTPStatus.OK.value:
             # TODO: The file metadata was not uploaded correctly.
             
             return
@@ -138,7 +144,7 @@ class RepositoryRecordsHandler:
         
         put_response = self._send_request('put', url=put_content_url, headers=put_headers, json=put_request_data, verify=False, auth=self._auth)
         
-        if put_response.status_code != HTTPStatus.OK:
+        if put_response.status_code != HTTPStatus.OK.value:
             # TODO: The file content was not uploaded correctly.
             
             return
@@ -148,7 +154,7 @@ class RepositoryRecordsHandler:
         
         commit_response = self._send_request('post', url=commit_url, headers=self._headers, verify=False, auth=self._auth)
         
-        if commit_response.status_code != HTTPStatus.OK:
+        if commit_response.status_code != HTTPStatus.OK.value:
             # TODO: The commit was not successful.
             
             return
@@ -161,7 +167,7 @@ class RepositoryRecordsHandler:
         response = self._send_request('post', url=self._collection_url, headers=self._headers, json=record.metadata, verify=False, auth=self._auth)
         response_payload = response.json()
         
-        return response_payload['id']
+        return response_payload
 
     def _send_request(self, http_verb, *args):
         try:
