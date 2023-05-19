@@ -164,7 +164,7 @@ class RepositoryRecordsHandler:
         """
         Creates a record in the repository with metadata given by the record parameter.
         """
-        response = self._send_request('post', url=self._collection_url, headers=self._headers, json=record.metadata, verify=False, auth=self._auth)
+        response = self._send_request('post', url=self._collection_url, headers=self._headers, json=record.metadata.metadata, verify=False, auth=self._auth)
         response_payload = response.json()
         
         return response_payload
