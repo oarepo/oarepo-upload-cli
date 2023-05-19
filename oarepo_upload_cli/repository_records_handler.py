@@ -1,10 +1,9 @@
 from dataclasses import dataclass
 from http import HTTPStatus
 import requests
-from typing import Dict, Optional
+from typing import Optional
 
 from oarepo_upload_cli.abstract_file import AbstractFile
-from oarepo_upload_cli.abstract_metadata import AbstractMetadata
 from oarepo_upload_cli.abstract_record import AbstractRecord
 from oarepo_upload_cli.token_auth import BearerAuthentication
 from oarepo_upload_cli.exceptions import ExceptionMessage, RepositoryCommunicationException

@@ -9,7 +9,7 @@ from oarepo_upload_cli.authentication_token_parser import AuthenticationTokenPar
 from oarepo_upload_cli.token_auth import BearerAuthentication
 from oarepo_upload_cli.entry_points_loader import EntryPointsLoaderConfig, EntryPointsLoader
 from oarepo_upload_cli.repository_data_extractor import RepositoryDataExtractor
-from oarepo_upload_cli.repository_records_handler import RepositoryRecordsHandler, RepositoryRecordsHandlerConfig
+from oarepo_upload_cli.repository_records_handler import RepositoryRecordsHandler
 
 @dataclass
 class MetadataConfig:
