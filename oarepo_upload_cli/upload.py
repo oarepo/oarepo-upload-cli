@@ -1,4 +1,5 @@
 import click
+from dataclasses import dataclass
 from datetime import datetime
 from dotenv import load_dotenv
 import os
@@ -8,7 +9,11 @@ from oarepo_upload_cli.authentication_token_parser import AuthenticationTokenPar
 from oarepo_upload_cli.token_auth import BearerAuthentication
 from oarepo_upload_cli.entry_points_loader import EntryPointsLoaderConfig, EntryPointsLoader
 from oarepo_upload_cli.repository_data_extractor import RepositoryDataExtractor
-from oarepo_upload_cli.repository_records_handler import RepositoryRecordsHandler
+from oarepo_upload_cli.repository_records_handler import RepositoryRecordsHandler, RepositoryRecordsHandlerConfig
+
+@dataclass
+class MetadataConfig:
+    modified_name: str
 
 @click.command()
 @click.option('--collection_url', help="Concrete collection URL address to synchronize records.")
@@ -77,8 +82,10 @@ def main(collection_url, source, modified_after, modified_before, token) -> None
         
         return
 
-    
-    repo_handler = RepositoryRecordsHandler(collection_url, auth)
+    metadata_config = MetadataConfig(
+        modified_name=os.getenv('RECORD_METADATA_MODIFIED', 'dateModified')
+    )
+    repo_handler = RepositoryRecordsHandler(metadata_config, collection_url, auth)
     source_records = tqdm(source.get_records(modified_after, modified_before), total=approximate_records_count, disable=None)
     for source_record in source_records:
         # Get the repository version of this record.
@@ -87,7 +94,7 @@ def main(collection_url, source, modified_after, modified_before, token) -> None
         # ------------
         # - Metadata -
         # ------------
-        last_metadata_modification = datetime.fromisoformat(repository_record['metadata']['updated'])
+        last_metadata_modification = datetime.fromisoformat(repository_record['metadata'][metadata_config.modified_name])
         if modified_after < last_metadata_modification <= modified_before:
             # Metadata was updated, upload the new version.
             
@@ -106,7 +113,7 @@ def main(collection_url, source, modified_after, modified_before, token) -> None
             source_file = [file for file in source_record_files if file.key == key][0]
             repository_file = [file for file in repository_records_files if file['key'] == key][0]
             
-            last_repository_modification = datetime.fromisoformat(repository_file['updated'])
+            last_repository_modification = datetime.fromisoformat(repository_file[metadata_config.modified_name])
             if last_repository_modification < source_file.modified:
                 # Source's is newer, update.
                 repo_handler.upload_file(source_record, source_file)
