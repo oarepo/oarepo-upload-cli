@@ -93,7 +93,7 @@ class RepositoryRecordsHandler:
         record_url = f'{self._collection_url}{record.id}'
         
         try:
-            response = requests.put(url=record_url, headers=self._headers, json=record.metadata, verify=False, auth=self._auth)
+            response = requests.put(url=record_url, headers=self._headers, json=record.metadata.metadata, verify=False, auth=self._auth)
         except requests.ConnectionError as conn_err:
             raise RepositoryCommunicationException(ExceptionMessage.ConnectionError, conn_err) from conn_err
         except Exception as err:
@@ -123,7 +123,7 @@ class RepositoryRecordsHandler:
         record_url = f'{self._collection_url}{record.id}'
 
         try:
-            response = requests.put(url=record_url, headers=self._headers, json=record.metadata, verify=False, auth=self._auth)
+            response = requests.put(url=record_url, headers=self._headers, json=record.metadata.metadata, verify=False, auth=self._auth)
         except requests.ConnectionError as conn_err:
             raise RepositoryCommunicationException(ExceptionMessage.ConnectionError, conn_err) from conn_err
         except Exception as err:

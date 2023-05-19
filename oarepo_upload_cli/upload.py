@@ -6,7 +6,6 @@ from dotenv import load_dotenv
 import os
 from tqdm import tqdm
 
-from oarepo_upload_cli.authentication_token_parser import AuthenticationTokenParser, AuthenticationTokenParserConfig
 from oarepo_upload_cli.token_auth import BearerAuthentication
 from oarepo_upload_cli.entry_points_loader import EntryPointsLoaderConfig, EntryPointsLoader
 from oarepo_upload_cli.repository_data_extractor import RepositoryDataExtractor
@@ -36,18 +35,14 @@ def main(collection_url, source, modified_after, modified_before, token) -> None
     # ---------------------------
     # - Authentication (Bearer) -
     # ---------------------------
-    token_parser_config = AuthenticationTokenParserConfig(
-        ini_group=os.getenv('AUTHENTICATION_INI_GROUP', 'authentication'),
-        ini_token=os.getenv('AUTHENTICATION_INI_TOKEN', 'token'),
-        ini_file_name=os.getenv('AUTHENTICATION_INI_FILE', 'oarepo_upload.ini')
-    )
-    token_parser = AuthenticationTokenParser(token_parser_config, token)
-    if not(token := token_parser.get_token()):
+    # TODO: delete ini
+    bearer_token = token or os.getenv('BEARER_TOKEN')
+    if not bearer_token:
         print('Bearer token is missing.')
         
         return
 
-    auth = BearerAuthentication(token)
+    auth = BearerAuthentication(bearer_token)
 
     # ----------------
     # - Entry points -
@@ -66,13 +61,13 @@ def main(collection_url, source, modified_after, modified_before, token) -> None
         # set modified before to current datetime
         modified_before = datetime.utcnow()
     else:
-        modified_before = arrow.get(modified_before).datetime
+        modified_before = arrow.get(modified_before).datetime.replace(tzinfo=None)
     
     if not modified_after:
         repo_data_extractor = RepositoryDataExtractor(collection_url, auth)
         modified_after = repo_data_extractor.get_data(path=['aggregations', 'max_date', 'value'])
     
-    modified_after = arrow.get(modified_after).datetime
+    modified_after = arrow.get(modified_after).datetime.replace(tzinfo=None)
 
     # ----------
     # - Upload -
