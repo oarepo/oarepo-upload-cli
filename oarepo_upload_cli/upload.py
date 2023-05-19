@@ -58,11 +58,15 @@ def main(collection_url, source, modified_after, modified_before, token) -> None
     # --------------
     if not modified_before:
         # set modified before to current datetime
-        modified_before = datetime.utcnow().isoformat()
+        modified_before = datetime.utcnow() #.isoformat()
+    else:
+        modified_before = datetime.fromtimestamp(modified_before)
     
     if not modified_after:
         repo_data_extractor = RepositoryDataExtractor(collection_url, auth)
         modified_after = repo_data_extractor.get_data(path=['aggregations', 'max_date', 'value'])
+    
+    modified_after = datetime.fromtimestamp(modified_after)
 
     # ----------
     # - Upload -
@@ -73,6 +77,7 @@ def main(collection_url, source, modified_after, modified_before, token) -> None
         
         return
 
+    
     repo_handler = RepositoryRecordsHandler(collection_url, auth)
     source_records = tqdm(source.get_records(modified_after, modified_before), total=approximate_records_count, disable=None)
     for source_record in source_records:
@@ -83,7 +88,7 @@ def main(collection_url, source, modified_after, modified_before, token) -> None
         # - Metadata -
         # ------------
         last_metadata_modification = datetime.fromisoformat(repository_record['metadata']['updated'])
-        if modified_after <= last_metadata_modification <= modified_before:
+        if modified_after < last_metadata_modification <= modified_before:
             # Metadata was updated, upload the new version.
             
             repo_handler.upload_metadata(source_record)
