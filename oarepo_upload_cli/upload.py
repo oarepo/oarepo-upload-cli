@@ -1,3 +1,4 @@
+import arrow
 import click
 from dataclasses import dataclass
 from datetime import datetime
@@ -63,15 +64,15 @@ def main(collection_url, source, modified_after, modified_before, token) -> None
     # --------------
     if not modified_before:
         # set modified before to current datetime
-        modified_before = datetime.utcnow() #.isoformat()
+        modified_before = datetime.utcnow()
     else:
-        modified_before = datetime.fromtimestamp(modified_before)
+        modified_before = arrow.get(modified_before).datetime
     
     if not modified_after:
         repo_data_extractor = RepositoryDataExtractor(collection_url, auth)
         modified_after = repo_data_extractor.get_data(path=['aggregations', 'max_date', 'value'])
     
-    modified_after = datetime.fromtimestamp(modified_after)
+    modified_after = arrow.get(modified_after).datetime
 
     # ----------
     # - Upload -
