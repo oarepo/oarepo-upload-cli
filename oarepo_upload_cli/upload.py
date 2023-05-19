@@ -2,7 +2,7 @@ import arrow
 import click
 from dataclasses import dataclass
 from datetime import datetime
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 import os
 from tqdm import tqdm
 
@@ -26,7 +26,7 @@ def main(collection_url, source, modified_after, modified_before, token) -> None
     # - Environment variables -
     # -------------------------
     try:
-        load_dotenv()
+        load_dotenv(find_dotenv(usecwd=True))
     except IOError as e:
         print(e)
         
@@ -35,7 +35,6 @@ def main(collection_url, source, modified_after, modified_before, token) -> None
     # ---------------------------
     # - Authentication (Bearer) -
     # ---------------------------
-    # TODO: delete ini
     bearer_token = token or os.getenv('BEARER_TOKEN')
     if not bearer_token:
         print('Bearer token is missing.')
