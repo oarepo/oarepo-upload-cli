@@ -169,10 +169,10 @@ class RepositoryRecordsHandler:
         
         return response_payload
 
-    def _send_request(self, http_verb, *args):
+    def _send_request(self, http_verb, **kwargs):
         try:
             request_method = getattr(globals()['requests'], http_verb)
-            response = request_method(args)
+            response = request_method(kwargs)
 
             response.raise_for_status()
         except requests.ConnectionError as conn_err:
