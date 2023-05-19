@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod, abstractproperty
+from abc import ABC, abstractmethod
 
 class AbstractFile(ABC):
     """
@@ -7,20 +7,19 @@ class AbstractFile(ABC):
     def __init__(self):
         pass
     
-    @abstractproperty
-    def key(self):
-        pass
-    
-    @abstractproperty
-    def uuid(self):
-        pass
-    
-    @abstractproperty
+    @abstractmethod
+    @property
     def content_type(self):
         pass
     
-    @abstractproperty
+    @abstractmethod
+    @property
     def modified(self):
+        pass
+    
+    @abstractmethod
+    @property
+    def metadata(self):
         pass
     
     @abstractmethod

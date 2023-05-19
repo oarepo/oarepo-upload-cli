@@ -3,11 +3,14 @@ from datetime import datetime
 from dotenv import load_dotenv
 import os
 from tqdm import tqdm
+from typing import Iterable
 
+from oarepo_upload_cli.abstract_record import AbstractRecord
 from oarepo_upload_cli.authentication_token_parser import AuthenticationTokenParser, AuthenticationTokenParserConfig
+from oarepo_upload_cli.token_auth import BearerAuthentication
+from oarepo_upload_cli.entry_points_loader import EntryPointsLoaderConfig, EntryPointsLoader
 from oarepo_upload_cli.repository_data_extractor import RepositoryDataExtractor
 from oarepo_upload_cli.repository_records_handler import RepositoryRecordsHandler
-from oarepo_upload_cli.entry_points_loader import EntryPointsLoaderConfig, EntryPointsLoader
 
 @click.command()
 @click.option('--collection_url', help="Concrete collection URL address to synchronize records.")
@@ -21,7 +24,6 @@ def main(collection_url, record_path, source_path, modified_after, modified_befo
     # - Environment variables -
     # -------------------------
     try:
-        # Ensure that environment variables are present and loaded.
         load_dotenv()
     except IOError as e:
         print(e)
@@ -41,6 +43,8 @@ def main(collection_url, record_path, source_path, modified_after, modified_befo
         print('Bearer token is missing.')
         
         return
+
+    auth = BearerAuthentication(token)
 
     # ----------------
     # - Entry points -
@@ -62,19 +66,23 @@ def main(collection_url, record_path, source_path, modified_after, modified_befo
         modified_before = datetime.utcnow().isoformat()
     
     if not modified_after:
-        repo_data_extractor = RepositoryDataExtractor(collection_url, token)
-        modified_after = repo_data_extractor.get_data(path=["aggregations", "max_date", "value"])
+        repo_data_extractor = RepositoryDataExtractor(collection_url, auth)
+        modified_after = repo_data_extractor.get_data(path=['aggregations', 'max_date', 'value'])
 
+    # ----------
+    # - Upload -
+    # ----------
     approximate_records_count = source.get_records_count(modified_after, modified_before)
     if not approximate_records_count:
         print(f'All records are up to the given date: {modified_after}')
+        
         return
 
-    repo_handler = RepositoryRecordsHandler(collection_url)
-    records = tqdm(source.get_records(modified_after, modified_before), total=approximate_records_count, disable=None)
-    for record in records:
-        # Get repository version of this record.
-        repository_record = repo_handler.get_record(record)
+    repo_handler = RepositoryRecordsHandler(collection_url, auth)
+    source_records = tqdm(source.get_records(modified_after, modified_before), total=approximate_records_count, disable=None)
+    for source_record in source_records:
+        # Get the repository version of this record.
+        repository_record = repo_handler.get_record(source_record)
         
         # ------------
         # - Metadata -
@@ -82,16 +90,25 @@ def main(collection_url, record_path, source_path, modified_after, modified_befo
         last_metadata_modification = datetime.fromisoformat(repository_record['metadata']['updated'])
         if modified_after <= last_metadata_modification <= modified_before:
             # Metadata was updated, upload the new version.
-            repo_handler.upload_metadata(record)
+            repo_handler.upload_metadata(source_record)
             
         # ---------
         # - Files -
         # ---------
-        records_files = repo_handler.get_records_files(record)
-        for file in records_files:
-            last_file_modification = datetime.fromisoformat(file['updated'])
+        source_record_files = source_record.files
+        repository_records_files = repo_handler.get_records_files(record)
+        
+        # Find identical files keys in both sources, update them.
+        source_files_keys = {file.key for file in source_record_files}
+        repository_files_keys = {file['key'] for file in repository_records_files}
+        for key in source_files_keys.intersection(repository_files_keys):
+            source_file = [file for file in source_record_files if file.key == key][0]
+            repo_handler.upload_file(record, source_file)
             
-            # TODO
+        # Find files that are in source but not yet in repo, upload them.
+        for key in source_files_keys.difference(repository_files_keys):
+            source_file = [file for file in source_record_files if file.key == key][0]
+            repo_handler.upload_file(record, source_file)
 
 if __name__ == "__main__":
     main()
