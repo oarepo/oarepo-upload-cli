@@ -1,7 +1,8 @@
 from http import HTTPStatus
 import requests
-from typing import Optional
+from typing import Dict, Optional
 
+from oarepo_upload_cli.abstract_file import AbstractFile
 from oarepo_upload_cli.abstract_metadata import AbstractMetadata
 from oarepo_upload_cli.abstract_record import AbstractRecord
 from oarepo_upload_cli.token_auth import BearerAuthentication
@@ -115,18 +116,53 @@ class RepositoryRecordsHandler:
             
             return response_payload['id']
 
-    def upload_file(self, record_id, file_key):
-        # TODO
+    def upload_file(self, record: AbstractRecord, metadata: Dict):
+        if not hasattr(record, 'id'):
+            raise AttributeError('Record is missing the \'id\' attribute.')
         
-        pass
+        # POST file metadata (a key).
+        post_files_url = f'{self._collection_url}{record.id}/files'
+        post_response = self._send_request('post', url=post_files_url, json=metadata, verify=False, auth=self._auth)
+        
+        if post_response.status_code != HTTPStatus.OK:
+            # TODO: The file metadata was not uploaded correctly.
+            
+            return
+        
+        post_reponse_payload = post_response.json()
+        
+        # PUT content        
+        put_content_url = f'{post_files_url}/{metadata["key"]}/content'
+        put_response = self._send_request('put', put_content_url, file)
+        
+        if put_response.status_code != HTTPStatus.OK:
+            # TODO: The file content was not uploaded correctly.
+            
+            return
+        
+        # POST commit.
+        commit_url = f'{post_files_url}/{key}/commit'
+        commit_response = self._send_request('post', commit_url)
+        
+        if commit_response.status_code != HTTPStatus.OK:
+            # TODO: The commit was not successful.
+            
+            return
+            
 
     def _create_record(self, record: AbstractRecord) -> Optional[str]:
         """
         Creates a record in the repository with metadata given by the record parameter.
         """
+        response = self._send_request('post', url=self._collection_url, headers=self._headers, json=record.metadata, verify=False, auth=self._auth)
+        response_payload = response.json()
+        
+        return response_payload['id']
 
+    def _send_request(self, http_verb, *args):
         try:
-            response = requests.post(url=self._collection_url, headers=self._headers, json=record.metadata, verify=False, auth=self._auth)
+            request_method = getattr(globals()['requests'], http_verb)
+            response = request_method(args)
 
             response.raise_for_status()
         except requests.ConnectionError as conn_err:
@@ -135,11 +171,7 @@ class RepositoryRecordsHandler:
             raise RepositoryCommunicationException(ExceptionMessage.HTTPError) from http_err
         except Exception as err:
             raise RepositoryCommunicationException() from err
-
-        response_payload = response.json()
-
-        return response_payload['id']
-
         
+        return response
 
         

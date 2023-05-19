@@ -13,13 +13,15 @@ class AbstractRecord(ABC):
         self._updated = updated
         self._id = id
 
-    @abstractproperty
+    @abstractmethod
+    @property
     def metadata(self) -> AbstractMetadata:
         """
         Returns a metadata serializable to JSON acceptable by a repository.
         """
 
-    @abstractproperty
+    @abstractmethod
+    @property
     def files(self) -> List[AbstractFile]:
         pass
 

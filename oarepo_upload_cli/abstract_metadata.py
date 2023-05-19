@@ -1,19 +1,17 @@
-from abc import ABC, abstractproperty
+from abc import ABC, abstractmethod
 
 class AbstractMetadata(ABC):
     def __init__(self):
         pass
     
-    @abstractproperty
+    @abstractmethod
+    @property
     def modified(self):
         """
         Returns the date of the last modification.
         """
-        
-    @abstractproperty
-    def uuid(self):
-        """
-        Returns the UUID.
-        """
     
-    
+    @abstractmethod
+    @property
+    def metadata(self):
+        pass
