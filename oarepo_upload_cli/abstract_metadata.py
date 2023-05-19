@@ -4,14 +4,14 @@ class AbstractMetadata(ABC):
     def __init__(self):
         pass
     
-    @abstractmethod
     @property
+    @abstractmethod
     def modified(self):
         """
         Returns the date of the last modification.
         """
     
-    @abstractmethod
     @property
+    @abstractmethod
     def metadata(self):
         pass
