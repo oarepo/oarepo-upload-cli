@@ -7,18 +7,18 @@ class AbstractFile(ABC):
     def __init__(self):
         pass
     
-    @abstractmethod
     @property
+    @abstractmethod
     def content_type(self):
         pass
     
-    @abstractmethod
     @property
+    @abstractmethod
     def modified(self):
         pass
     
-    @abstractmethod
     @property
+    @abstractmethod
     def metadata(self):
         pass
     
