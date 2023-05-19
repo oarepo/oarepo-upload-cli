@@ -18,7 +18,26 @@ class RepositoryRecordsHandler:
         self._headers = { "Content-Type": "application/json" }
 
     def delete_file(self, record: AbstractRecord, file: AbstractFile):
-        pass
+        if not hasattr(record, 'id'):
+            raise AttributeError('Record is missing the \'id\' attribute.')
+        
+        file_url = f'{self._collection_url}{record.id}/{file.key}'
+        
+        delete_response = self._send_request('delete', url=file_url, headers=self._headers, verify=False, auth=self._auth)
+        
+        if delete_response.status_code != HTTPStatus.OK.value:
+            # TODO: The file was not deleted correctly.
+            
+            return
+        
+        commit_url = f'{file_url}/commit'
+        
+        commit_response = self._send_request('post', url=commit_url, headers=self._headers, verify=False, auth=self._auth)
+        
+        if commit_response.status_code != HTTPStatus.OK.value:
+            # TODO: The commit was not successful.
+            
+            return        
 
     def get_record(self, record: AbstractRecord):
         """
@@ -91,7 +110,7 @@ class RepositoryRecordsHandler:
             response_payload = response.json()
             
             return response_payload
-            
+    
     def upload_record(self, record: AbstractRecord) -> Optional[str]:
         """
         Uploads a record to the repository with metadata given by the record parameter.
@@ -178,6 +197,8 @@ class RepositoryRecordsHandler:
         except requests.ConnectionError as conn_err:
             raise RepositoryCommunicationException(ExceptionMessage.ConnectionError) from conn_err
         except requests.HTTPError as http_err:
+            print(http_err.response)
+            
             raise RepositoryCommunicationException(ExceptionMessage.HTTPError) from http_err
         except Exception as err:
             raise RepositoryCommunicationException() from err
