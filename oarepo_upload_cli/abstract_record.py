@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
-from abstract_file import AbstractFile
-from abstract_metadata import AbstractMetadata
 from typing import List
+
+from .abstract_file import AbstractFile
+from .abstract_metadata import AbstractMetadata
 
 class AbstractRecord(ABC):
     """
