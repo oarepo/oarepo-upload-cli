@@ -4,8 +4,8 @@ class AbstractFile(ABC):
     """
     Represent a records file.
     """
-    def __init__(self):
-        pass
+    def __init__(self, key):
+        self._key = key
     
     @property
     @abstractmethod
@@ -13,16 +13,17 @@ class AbstractFile(ABC):
         pass
     
     @property
+    def key(self):
+        return self._key
+    
+    @property
     @abstractmethod
     def modified(self):
         pass
     
-    @property
-    @abstractmethod
     def metadata(self):
-        pass
+        return { 'key': self._key }
     
     @abstractmethod
     def get_reader(self):
         pass
-    
