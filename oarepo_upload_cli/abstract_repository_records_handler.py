@@ -1,14 +1,15 @@
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from http import HTTPStatus
 import requests
-from typing import Optional
+from typing import Dict, Optional
 
 from oarepo_upload_cli.abstract_file import AbstractFile
 from oarepo_upload_cli.abstract_record import AbstractRecord
 from oarepo_upload_cli.token_auth import BearerAuthentication
 from oarepo_upload_cli.exceptions import ExceptionMessage, RepositoryCommunicationException
 
-class RepositoryRecordsHandler:
+class AbstractRepositoryRecordsHandler(ABC):
     def __init__(self, collection_url: str, auth: BearerAuthentication):
         if not collection_url.endswith('/'):
             collection_url += '/'
@@ -16,6 +17,10 @@ class RepositoryRecordsHandler:
         self._auth = auth
         self._collection_url = collection_url
         self._headers = { "Content-Type": "application/json" }
+        
+    @abstractmethod
+    def get_id_query(id: str) -> Dict[str, str]:
+        pass
 
     def delete_file(self, record: AbstractRecord, file: AbstractFile):
         if not hasattr(record, 'id'):
@@ -25,6 +30,7 @@ class RepositoryRecordsHandler:
         
         delete_response = self._send_request('delete', url=file_url, headers=self._headers, verify=False, auth=self._auth)
         
+        # 200 ?, 202 - Accepted, 204 - No content
         if delete_response.status_code != HTTPStatus.OK.value:
             # TODO: The file was not deleted correctly.
             
@@ -177,7 +183,6 @@ class RepositoryRecordsHandler:
             # TODO: The commit was not successful.
             
             return
-            
 
     def _create_record(self, record: AbstractRecord) -> Optional[str]:
         """

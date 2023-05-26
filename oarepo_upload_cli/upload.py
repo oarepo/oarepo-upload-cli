@@ -9,7 +9,7 @@ from tqdm import tqdm
 from oarepo_upload_cli.token_auth import BearerAuthentication
 from oarepo_upload_cli.entry_points_loader import EntryPointsLoaderConfig, EntryPointsLoader
 from oarepo_upload_cli.repository_data_extractor import RepositoryDataExtractor
-from oarepo_upload_cli.repository_records_handler import RepositoryRecordsHandler
+from oarepo_upload_cli.abstract_repository_records_handler import RepositoryRecordsHandler
 
 @dataclass
 class MetadataConfig:
@@ -18,10 +18,11 @@ class MetadataConfig:
 @click.command()
 @click.option('--collection_url', help="Concrete collection URL address to synchronize records.")
 @click.option('--source', help="Record source entry point path.")
+@click.option('--repo_handler', help="Custom repository records handler.")
 @click.option('--modified_after', help="Timestamp that represents date after modification. If not specified, the last updated timestamp from repository will be used.")
 @click.option('--modified_before', help="Timestamp that represents date before modification.")
 @click.option('--token', help="SIS bearer authentication token.")
-def main(collection_url, source, modified_after, modified_before, token) -> None:
+def main(collection_url, source, repo_handler, modified_after, modified_before, token) -> None:
     # -------------------------
     # - Environment variables -
     # -------------------------
@@ -49,9 +50,11 @@ def main(collection_url, source, modified_after, modified_before, token) -> None
     ep_config = EntryPointsLoaderConfig(
         group=os.getenv('ENTRY_POINTS_GROUP', 'oarepo_upload_cli.dependencies'),
         source=os.getenv('ENTRY_POINTS_SOURCE', 'source'),
+        repo_handler=os.getenv('ENTRY_POINTS_REPO_HANDLER', 'repo_handler')        
     )
     ep_loader = EntryPointsLoader(config=ep_config)
-    source = ep_loader.load_abstract_record_source(source_arg=source)
+    source = ep_loader.load_entry_point(config_value=ep_config.source, arg=source)()
+    repo_handler = ep_loader.load_entry_point(config_value=ep_config.repo_handler, arg=repo_handler)(collection_url, auth)
 
     # --------------
     # - Timestamps -
@@ -80,7 +83,6 @@ def main(collection_url, source, modified_after, modified_before, token) -> None
     metadata_config = MetadataConfig(
         modified_name=os.getenv('RECORD_METADATA_MODIFIED', 'dateModified')
     )
-    repo_handler = RepositoryRecordsHandler(collection_url, auth)
     source_records = tqdm(source.get_records(modified_after, modified_before), total=approximate_records_count, disable=None)
     for source_record in source_records:
         # Get the repository version of this record.
