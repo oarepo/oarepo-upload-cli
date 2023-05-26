@@ -81,7 +81,12 @@ class AbstractRepositoryRecordsHandler(ABC):
             return True, None
         
         response_payload = response.json()
-        return False, response_payload
+        hits = response_payload['hits']['hits']
+        
+        assert len(hits), f'No hit for the identifier: ${record.id}'
+        metadata = hits[0]
+        
+        return False, metadata
 
     def get_records_files(self, record: AbstractRecord):
         """
