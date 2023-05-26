@@ -1,8 +1,7 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 from http import HTTPStatus
 import requests
-from typing import Dict, Optional
+from typing import Dict, Optional, Tuple
 
 from oarepo_upload_cli.abstract_file import AbstractFile
 from oarepo_upload_cli.abstract_record import AbstractRecord
@@ -17,20 +16,35 @@ class AbstractRepositoryRecordsHandler(ABC):
         self._auth = auth
         self._collection_url = collection_url
         self._headers = { "Content-Type": "application/json" }
-        
+    
     @abstractmethod
     def get_id_query(id: str) -> Dict[str, str]:
         pass
 
+    def create_record(self, record: AbstractRecord) -> Optional[str]:
+        """
+        Creates a record in the repository with the given metadata.
+        
+        Returns created record metadata.
+        """
+        
+        response = self._send_request('post', url=self._collection_url, headers=self._headers, json=record.metadata.metadata, verify=False, auth=self._auth)
+
+        response_payload = response.json()
+        return response_payload
+
     def delete_file(self, record: AbstractRecord, file: AbstractFile):
-        if not hasattr(record, 'id'):
-            raise AttributeError('Record is missing the \'id\' attribute.')
+        """
+        Tries to delete a given file of a given record by its key.
+        """
+        
+        assert record.id is not None, "Record's identifier was not set."
+        assert file.key is not None, "File's key was not set."
         
         file_url = f'{self._collection_url}{record.id}/{file.key}'
         
         delete_response = self._send_request('delete', url=file_url, headers=self._headers, verify=False, auth=self._auth)
         
-        # 200 ?, 202 - Accepted, 204 - No content
         if delete_response.status_code != HTTPStatus.OK.value:
             # TODO: The file was not deleted correctly.
             
@@ -45,37 +59,39 @@ class AbstractRepositoryRecordsHandler(ABC):
             
             return        
 
-    def get_record(self, record: AbstractRecord):
+    def get_record(self, record: AbstractRecord) -> Tuple[bool, Optional[object]]:
         """
-        Returns a record from the repository given by the collection url based on the id attribute.
+        Performs search request for the given record in the repository.
+        Returns a tuple that consists of an indicator whether it is a new record,
+        and a record from the repository given by the record identifier if exists, otherwise None.
         """
         
-        if not hasattr(record, 'id'):
-            raise AttributeError('Record is missing the \'id\' attribute.')
-        
-        record_url = f'{self._collection_url}{record.id}'
+        assert record.id is not None, "Record's identifier was not set."
+
+        params, url = self.get_id_query(record.id), self._collection_url
         
         try:
-            response = requests.get(url=record_url, headers=self._headers, verify=False, auth=self._auth)
+            response = requests.get(url=url, params=params, headers=self._headers, verify=False, auth=self._auth)
         except requests.ConnectionError as conn_err:
             raise RepositoryCommunicationException(ExceptionMessage.ConnectionError, conn_err) from conn_err
         except Exception as err:
             raise RepositoryCommunicationException(err) from err
         
-        if response.status_code == HTTPStatus.NOT_FOUND.value:
-            return self._create_record(record)
-        
         if response.status_code != HTTPStatus.OK.value:
-            response.raise_for_status()
+            return True, None
         
-        repository_record = response.json()
-        return repository_record
+        response_payload = response.json()
+        return False, response_payload
 
     def get_records_files(self, record: AbstractRecord):
-        if not hasattr(record, 'id'):
-            raise AttributeError('Record is missing the \'id\' attribute.')
+        """
+        Returns metadata of a given record files.
+        """
         
         repository_record = self.get_record(record)
+        
+        assert repository_record is not None, "Record does not exist in the repository anymore."
+        
         files_url = repository_record['links']['files']
         records_files_url = f'{self._collection_url}{files_url}'
         
@@ -92,9 +108,12 @@ class AbstractRepositoryRecordsHandler(ABC):
         record_repository_files = response.json()
         return record_repository_files['entries']
 
-    def upload_metadata(self, record: AbstractRecord):
-        if not hasattr(record, 'id'):
-            raise AttributeError('Record is missing the \'id\' attribute.')
+    def update_metadata(self, record: AbstractRecord):
+        """
+        Perform actualization of a given records metadata.
+        """
+        
+        assert record.id is not None, "Record's identifier was not set."
         
         record_url = f'{self._collection_url}{record.id}'
         
@@ -103,53 +122,22 @@ class AbstractRepositoryRecordsHandler(ABC):
         except requests.ConnectionError as conn_err:
             raise RepositoryCommunicationException(ExceptionMessage.ConnectionError, conn_err) from conn_err
         except Exception as err:
-            raise RepositoryCommunicationException(err) from err
+            raise RepositoryCommunicationException(err.message, err) from err
 
-        if response.status_code == HTTPStatus.NOT_FOUND.value:
-            raise ValueError()
-        else:
-            try:
-                response.raise_for_status()
-            except requests.HTTPError as http_err:
-                raise RepositoryCommunicationException(ExceptionMessage.HTTPError, http_err) from http_err
-
-            response_payload = response.json()
+        if response.status_code != HTTPStatus.OK.value:
+            response.raise_for_status()
             
-            return response_payload
-    
-    def upload_record(self, record: AbstractRecord) -> Optional[str]:
-        """
-        Uploads a record to the repository with metadata given by the record parameter.
-        If already present, modifies the content.
-        """
-        
-        if not hasattr(record, 'id'):
-            return self._create_record(record)
-
-        record_url = f'{self._collection_url}{record.id}'
-
-        try:
-            response = requests.put(url=record_url, headers=self._headers, json=record.metadata.metadata, verify=False, auth=self._auth)
-        except requests.ConnectionError as conn_err:
-            raise RepositoryCommunicationException(ExceptionMessage.ConnectionError, conn_err) from conn_err
-        except Exception as err:
-            raise RepositoryCommunicationException(err) from err
-
-        if response.status_code == HTTPStatus.NOT_FOUND.value:
-            return self._create_record(record)
-        else:
-            try:
-                response.raise_for_status()
-            except requests.HTTPError as http_err:
-                raise RepositoryCommunicationException(ExceptionMessage.HTTPError, http_err) from http_err
-
-            response_payload = response.json()
-            
-            return response_payload
+        response_payload = response.json()
+        return response_payload
 
     def upload_file(self, record: AbstractRecord, file: AbstractFile):
-        if not hasattr(record, 'id'):
-            raise AttributeError('Record is missing the \'id\' property.')
+        """
+        Creates a file given by the file metadata of a given record if it does not exists yet.
+        If it already exists, updates it.
+        """
+        
+        assert record.id is not None, "Record's identifier was not set."
+        assert file.key is not None, "File's key was not set."
         
         # POST the file metadata (a key).
         post_files_url = f'{self._collection_url}{record.id}/files'
@@ -184,15 +172,6 @@ class AbstractRepositoryRecordsHandler(ABC):
             
             return
 
-    def _create_record(self, record: AbstractRecord) -> Optional[str]:
-        """
-        Creates a record in the repository with metadata given by the record parameter.
-        """
-        response = self._send_request('post', url=self._collection_url, headers=self._headers, json=record.metadata.metadata, verify=False, auth=self._auth)
-        response_payload = response.json()
-        
-        return response_payload
-
     def _send_request(self, http_verb, **kwargs):
         try:
             request_method = getattr(globals()['requests'], http_verb)
@@ -202,8 +181,6 @@ class AbstractRepositoryRecordsHandler(ABC):
         except requests.ConnectionError as conn_err:
             raise RepositoryCommunicationException(ExceptionMessage.ConnectionError, conn_err) from conn_err
         except requests.HTTPError as http_err:
-            print(http_err.response)
-            
             raise RepositoryCommunicationException(ExceptionMessage.HTTPError, http_err) from http_err
         except Exception as err:
             raise RepositoryCommunicationException(err) from err

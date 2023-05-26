@@ -85,17 +85,20 @@ def main(collection_url, source, repo_handler, modified_after, modified_before, 
     source_records = tqdm(source.get_records(modified_after, modified_before), total=approximate_records_count, disable=None)
     for source_record in source_records:
         # Get the repository version of this record.
-        repository_record = repo_handler.get_record(source_record)
+        is_new, repository_record = repo_handler.get_record(source_record)
+        if is_new:
+            repository_record = repo_handler.create_record(source_record)
         
         # ------------
         # - Metadata -
         # ------------
-        last_metadata_modification = datetime.fromisoformat(repository_record['metadata'][metadata_config.modified_name])
-        if modified_after < last_metadata_modification <= modified_before:
-            # Metadata was updated, upload the new version.
+        if not is_new:
+            last_metadata_modification = datetime.fromisoformat(repository_record['metadata'][metadata_config.modified_name])
+            if modified_after < last_metadata_modification <= modified_before:
+                # Metadata was updated, upload the new version.
+                
+                repo_handler.update_metadata(source_record)
             
-            repo_handler.upload_metadata(source_record)
-        
         # ---------
         # - Files -
         # ---------
@@ -113,7 +116,7 @@ def main(collection_url, source, repo_handler, modified_after, modified_before, 
             if last_repository_modification < source_file.modified:
                 # Source's is newer, update.
                 repo_handler.upload_file(source_record, source_file)
-                
+        
         # Find files that are in source but not yet in repo, upload them.
         for key in source_files_keys.difference(repository_files_keys):
             source_file = [file for file in source_record_files if file.key == key][0]
