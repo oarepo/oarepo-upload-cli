@@ -1,8 +1,13 @@
+from typing import Dict
 import pytest
 import requests
 
-from oarepo_upload_cli.repository_records_handler import RepositoryRecordsHandler
+from oarepo_upload_cli.abstract_repository_records_handler import AbstractRepositoryRecordsHandler
 from test_record import TestRecord
+
+class TestRepositoryRecordsHandler(AbstractRepositoryRecordsHandler):
+    def get_id_query(id: str) -> Dict[str, str]:
+        return {}
 
 headers = { "Content-Type": "application/json" }
 url = 'https://localhost:5000/api/model/'
@@ -23,7 +28,7 @@ def run_before_and_after_tests():
         response.raise_for_status()
 
 def test_create():
-    records_handler = RepositoryRecordsHandler(collection_url=url)
+    records_handler = TestRepositoryRecordsHandler(collection_url=url)
 
     # ARRANGE
     # -------
@@ -52,7 +57,7 @@ def test_create():
 def test_upload():
     # ARRANGE
     # -------
-    records_handler = RepositoryRecordsHandler(collection_url=url)
+    records_handler = TestRepositoryRecordsHandler(collection_url=url)
 
     record_previous = TestRecord('2001-03-07')
     record_previous.id = records_handler.upload_record(record_previous)
