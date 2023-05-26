@@ -12,7 +12,7 @@ class RepositoryCommunicationException(Exception):
     """    
     
     def __init__(self, message, error):
-        super(message)
+        super.__init__(message)
         self._error = error
 
 class ExceptionMessage(Enum):
