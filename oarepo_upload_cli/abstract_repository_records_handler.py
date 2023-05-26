@@ -59,7 +59,7 @@ class AbstractRepositoryRecordsHandler(ABC):
             
             return        
 
-    def get_record(self, record: AbstractRecord) -> Tuple[bool, Optional[object]]:
+    def get_record(self, record: AbstractRecord) -> Optional[object]:
         """
         Performs search request for the given record in the repository.
         Returns a tuple that consists of an indicator whether it is a new record,
@@ -68,25 +68,14 @@ class AbstractRepositoryRecordsHandler(ABC):
         
         assert record.id is not None, "Record's identifier was not set."
 
-        params, url = self.get_id_query(record.id), self._collection_url
+        params = self.get_id_query(record.id)
         
-        try:
-            response = requests.get(url=url, params=params, headers=self._headers, verify=False, auth=self._auth)
-        except requests.ConnectionError as conn_err:
-            raise RepositoryCommunicationException(ExceptionMessage.ConnectionError, conn_err) from conn_err
-        except Exception as err:
-            raise RepositoryCommunicationException(err) from err
-        
-        if response.status_code != HTTPStatus.OK.value:
-            return True, None
-        
+        response = self._send_request('get', url=self._collection_url, params=params, headers=self._headers, verify=False, auth=self._auth)
         response_payload = response.json()
-        hits = response_payload['hits']['hits']
         
-        assert len(hits), f'No hit for the identifier: ${record.id}'
-        metadata = hits[0]
-        
-        return False, metadata
+        assert len(hits := response_payload['hits']['hits']), f'No hit for the identifier: ${record.id}'
+        metadata = hits[0]        
+        return metadata
 
     def get_records_files(self, record: AbstractRecord):
         """
@@ -99,17 +88,8 @@ class AbstractRepositoryRecordsHandler(ABC):
         
         files_url = repository_record['links']['files']
         records_files_url = f'{self._collection_url}{files_url}'
+        response = self._send_request('get', url=records_files_url, headers=self._headers, verify=False, auth=self._auth)
         
-        try:
-            response = requests.get(url=records_files_url, headers=self._headers, verify=False, auth=self._auth)
-        except requests.ConnectionError as conn_err:
-            raise RepositoryCommunicationException(ExceptionMessage.ConnectionError, conn_err) from conn_err
-        except Exception as err:
-            raise RepositoryCommunicationException(err) from err
-        
-        if response.status_code != HTTPStatus.OK.value:
-            response.raise_for_status()
-            
         record_repository_files = response.json()
         return record_repository_files['entries']
 
@@ -121,17 +101,8 @@ class AbstractRepositoryRecordsHandler(ABC):
         assert record.id is not None, "Record's identifier was not set."
         
         record_url = f'{self._collection_url}{record.id}'
+        response = self._send_request('put', url=record_url, headers=self._headers, json=record.metadata.metadata, verify=False, auth=self._auth)
         
-        try:
-            response = requests.put(url=record_url, headers=self._headers, json=record.metadata.metadata, verify=False, auth=self._auth)
-        except requests.ConnectionError as conn_err:
-            raise RepositoryCommunicationException(ExceptionMessage.ConnectionError, conn_err) from conn_err
-        except Exception as err:
-            raise RepositoryCommunicationException(err.message, err) from err
-
-        if response.status_code != HTTPStatus.OK.value:
-            response.raise_for_status()
-            
         response_payload = response.json()
         return response_payload
 
@@ -188,7 +159,7 @@ class AbstractRepositoryRecordsHandler(ABC):
         except requests.HTTPError as http_err:
             raise RepositoryCommunicationException(ExceptionMessage.HTTPError, http_err) from http_err
         except Exception as err:
-            raise RepositoryCommunicationException(err) from err
+            raise RepositoryCommunicationException(err.message, err) from err
         
         return response
 

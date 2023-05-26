@@ -85,14 +85,11 @@ def main(collection_url, source, repo_handler, modified_after, modified_before, 
     source_records = tqdm(source.get_records(modified_after, modified_before), total=approximate_records_count, disable=None)
     for source_record in source_records:
         # Get the repository version of this record.
-        is_new, repository_record = repo_handler.get_record(source_record)
-        if is_new:
+        repository_record = repo_handler.get_record(source_record)
+        if not repository_record:
             repository_record = repo_handler.create_record(source_record)
-        
-        # ------------
-        # - Metadata -
-        # ------------
-        if not is_new:
+        else:
+            # Check for the update of record's metadata.
             last_metadata_modification = datetime.fromisoformat(repository_record['metadata'][metadata_config.modified_name])
             if modified_after < last_metadata_modification <= modified_before:
                 # Metadata was updated, upload the new version.
