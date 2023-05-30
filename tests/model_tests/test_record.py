@@ -1,20 +1,25 @@
+from typing import List
+
+from oarepo_upload_cli.abstract_file import AbstractFile
+from oarepo_upload_cli.abstract_metadata import AbstractMetadata
 from oarepo_upload_cli.abstract_record import AbstractRecord
+from uct_repository_uploader.ciselniky import degree_grantors
+from .test_file import TestFile
+from .test_metadata import TestMetadata
 
 class TestRecord(AbstractRecord):
-    # prevent pytest from trying to discover tests in the class
-    __test__ = False
+    def __init__(self, timestamp, zakladni_metadata, lide, soubory, anotace):
+        super().__init__(timestamp, zakladni_metadata['ID_PRACE'])
+        self._metadata = TestMetadata(zakladni_metadata, lide, anotace)
+        self._files = []
 
-    def __init__(self, updated: str, id: str = None):
-        self._updated = updated
-        self._id = id
-
-    def get_metadata(self):
-        return { "metadata": { "updated": self._updated } }
+        for soubor in soubory:
+            self.files.append(TestFile(soubor, zakladni_metadata))
 
     @property
-    def id(self):
-        return self._id
+    def metadata(self) -> AbstractMetadata:
+        return self._metadata
 
-    @id.setter
-    def id(self, value):
-        self._id = value
+    @property
+    def files(self) -> List[AbstractFile]:
+        return self._files
