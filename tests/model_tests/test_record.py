@@ -3,7 +3,6 @@ from typing import List
 from oarepo_upload_cli.abstract_file import AbstractFile
 from oarepo_upload_cli.abstract_metadata import AbstractMetadata
 from oarepo_upload_cli.abstract_record import AbstractRecord
-from uct_repository_uploader.ciselniky import degree_grantors
 from .test_file import TestFile
 from .test_metadata import TestMetadata
 
