@@ -92,8 +92,6 @@ def main(collection_url, source, repo_handler, modified_after, modified_before, 
             # Check for the update of record's metadata.
             last_metadata_modification = datetime.fromisoformat(repository_record['metadata'][metadata_config.modified_name])
             if modified_after < last_metadata_modification <= modified_before:
-                # Metadata was updated, upload the new version.
-                
                 repo_handler.update_metadata(source_record)
             
         # ---------
