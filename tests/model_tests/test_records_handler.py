@@ -62,6 +62,9 @@ def test_create_record():
     assert len(created_metadatas_ids) == len(records_hits_ids)
     assert all([a == b for a, b in zip(sorted(created_metadatas_ids), sorted(records_hits_ids))])
 
+def test_delete_file():
+    pass
+
 def test_delete_record():
     records_handler = TestRepositoryRecordsHandler(collection_url, auth)
 
@@ -115,6 +118,12 @@ def test_get_record_does_not_exist():
     # ------
     assert returned_metadata is None
 
+def test_update_metadata():
+    pass
+
+def test_upload_file():
+    pass
+
 def requests_send_request(headers, auth, http_verb, url):
     try:
         request_method = getattr(globals()['requests'], http_verb)
@@ -126,8 +135,8 @@ def requests_send_request(headers, auth, http_verb, url):
         
         return
     
-    return response.json()
-    
+    return response.json()    
+
 if __name__ == "__main__":
     headers = { "Content-Type": "application/json" }
     collection_url = 'https://localhost:5000/api/model/'
