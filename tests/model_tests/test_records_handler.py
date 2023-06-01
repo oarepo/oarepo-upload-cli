@@ -4,8 +4,8 @@ import pytest
 import requests
 
 from oarepo_upload_cli.token_auth import BearerAuthentication
-from .records_handler import TestRepositoryRecordsHandler
-from tests.model_tests.record import TestRecord
+from .infrastructure.records_handler import TestRepositoryRecordsHandler
+from .infrastructure.record import TestRecord
 
 @pytest.fixture(autouse=True)
 def run_before_and_after_tests():
