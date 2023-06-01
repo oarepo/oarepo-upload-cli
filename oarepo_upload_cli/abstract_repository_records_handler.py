@@ -73,9 +73,8 @@ class AbstractRepositoryRecordsHandler(ABC):
         response = self._send_request('get', url=self._collection_url, params=params, headers=self._headers, verify=False, auth=self._auth)
         response_payload = response.json()
         
-        assert len(hits := response_payload['hits']['hits']), f'No hit for the identifier: ${record.id}'
-        metadata = hits[0]        
-        return metadata
+        hits = response_payload['hits']['hits']
+        return None if not hits else hits[0]
 
     def get_records_files(self, record: AbstractRecord):
         """
