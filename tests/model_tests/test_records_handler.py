@@ -38,6 +38,30 @@ def run_before_and_after_tests():
         delete_metadata_commit_url = f'{record_metadata_url}/commit'
         send_request('post', delete_metadata_commit_url)
 
+def test_create_record():
+    records_handler = TestRepositoryRecordsHandler(collection_url, auth)
+
+    # ARRANGE
+    # -------
+    # TODO: apply source here
+    record1 = TestRecord('2022-11-02')
+    record2 = TestRecord('2015-10-13')
+    record3 = TestRecord('2019-03-30')
+
+    records = [record1, record2, record3]
+
+    # ACT
+    # ---
+    created_metadatas_ids = [records_handler.create_record(record)['id'] for record in records]
+    
+    # ASSERT
+    # ------
+    records_response_payload = send_request('get', collection_url)
+    records_hits_ids = [hit['id'] for hit in records_response_payload['hits']['hits']]
+
+    assert len(created_metadatas_ids) == len(records_hits_ids)
+    assert all([a == b for a, b in zip(sorted(created_metadatas_ids), sorted(records_hits_ids))])
+
 def test_delete_record():
     records_handler = TestRepositoryRecordsHandler(collection_url, auth)
 
@@ -58,29 +82,38 @@ def test_delete_record():
 
     assert created_metadata['id'] not in records_hits_ids
 
-def test_get_record_all_new():
+def test_get_record_exists():
     records_handler = TestRepositoryRecordsHandler(collection_url, auth)
 
     # ARRANGE
     # -------
     # TODO: apply source here
-    record1 = TestRecord('2022-11-02')
-    record2 = TestRecord('2015-10-13')
-    record3 = TestRecord('2019-03-30')
-
-    records = [record1, record2, record3]
+    record = TestRecord('2022-11-02')
+    created_metadata = records_handler.create_record(record)
 
     # ACT
     # ---
-    created_metadatas_ids = [records_handler.get_record(record)['id'] for record in records]
+    returned_metadata = records_handler.get_record(record)
     
     # ASSERT
     # ------
-    records_response_payload = send_request('get', collection_url)
-    records_hits_ids = [hit['id'] for hit in records_response_payload['hits']['hits']]
+    assert created_metadata['id'] == returned_metadata['id']
+    
+def test_get_record_does_not_exist():
+    records_handler = TestRepositoryRecordsHandler(collection_url, auth)
 
-    assert len(created_metadatas_ids) == len(records_hits_ids)
-    assert all([a == b for a, b in zip(sorted(created_metadatas_ids), sorted(records_hits_ids))])
+    # ARRANGE
+    # -------
+    # TODO: apply source here
+    record = TestRecord('2022-11-02')
+
+    # ACT
+    # ---
+    returned_metadata = records_handler.get_record(record)
+    
+    # ASSERT
+    # ------
+    assert returned_metadata is None
 
 def requests_send_request(headers, auth, http_verb, url):
     try:
