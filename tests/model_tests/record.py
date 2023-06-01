@@ -3,8 +3,8 @@ from typing import List
 from oarepo_upload_cli.abstract_file import AbstractFile
 from oarepo_upload_cli.abstract_metadata import AbstractMetadata
 from oarepo_upload_cli.abstract_record import AbstractRecord
-from .test_file import TestFile
-from .test_metadata import TestMetadata
+from .file import TestFile
+from .metadata import TestMetadata
 
 class TestRecord(AbstractRecord):
     def __init__(self, timestamp, zakladni_metadata, lide, soubory, anotace):
