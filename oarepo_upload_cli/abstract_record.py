@@ -41,3 +41,5 @@ class AbstractRecord(ABC):
         """
         
         self._id = value
+        
+    # TODO: deleted property - by that check if the record is ready to be deleted
