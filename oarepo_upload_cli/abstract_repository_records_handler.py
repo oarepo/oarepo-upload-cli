@@ -154,11 +154,11 @@ class AbstractRepositoryRecordsHandler(ABC):
 
             response.raise_for_status()
         except requests.ConnectionError as conn_err:
-            raise RepositoryCommunicationException(ExceptionMessage.ConnectionError, conn_err, response.text) from conn_err
+            raise RepositoryCommunicationException(ExceptionMessage.ConnectionError, conn_err) from conn_err
         except requests.HTTPError as http_err:
             raise RepositoryCommunicationException(ExceptionMessage.HTTPError, http_err, response.text) from http_err
         except Exception as err:
-            raise RepositoryCommunicationException(err.message, err, response.text) from err
+            raise RepositoryCommunicationException(err.message, err) from err
         
         return response
 
