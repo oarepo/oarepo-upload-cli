@@ -100,9 +100,10 @@ def main(collection_url, source, repo_handler, modified_after, modified_before, 
         source_record_files = source_record.files
         repository_records_files = repo_handler.get_records_files(source_record)
         
-        # Find identical files keys in both sources, update them.
         source_files_keys = {file.key for file in source_record_files}
         repository_files_keys = {file['key'] for file in repository_records_files}
+        
+        # Find identical files keys in both sources, update them.
         for key in source_files_keys.intersection(repository_files_keys):
             source_file = [file for file in source_record_files if file.key == key][0]
             repository_file = [file for file in repository_records_files if file['key'] == key][0]
