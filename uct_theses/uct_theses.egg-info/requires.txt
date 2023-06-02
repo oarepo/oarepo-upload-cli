@@ -1,0 +1,4 @@
+oarepo-runtime>=1.0.0
+nr-metadata>=1.0.0
+nr-vocabularies>=1.0.0
+oarepo<12,>=11

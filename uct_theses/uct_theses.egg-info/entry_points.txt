@@ -1,0 +1,39 @@
+[flask.commands]
+uct_theses = uct_theses.cli:group
+
+[invenio_base.api_apps]
+uct_theses = uct_theses.ext:UctThesesExt
+uct_theses_file = uct_theses.ext:UctThesesFileExt
+
+[invenio_base.api_blueprints]
+uct_theses = uct_theses.views:create_blueprint_from_app_uct_theses
+uct_theses_file = uct_theses.views:create_blueprint_from_app_uct_theses_file
+
+[invenio_base.apps]
+uct_theses = uct_theses.ext:UctThesesExt
+uct_theses_file = uct_theses.ext:UctThesesFileExt
+
+[invenio_base.blueprints]
+uct_theses = uct_theses.views:create_blueprint_from_app_uct_thesesExt
+uct_theses_file = uct_theses.views:create_blueprint_from_app_uct_theses_fileExt
+
+[invenio_db.alembic]
+uct_theses = uct_theses:alembic
+
+[invenio_db.models]
+uct_theses = uct_theses.records.models
+
+[invenio_i18n.translations]
+uct_theses = uct_theses
+
+[invenio_jsonschemas.schemas]
+uct_theses = uct_theses.records.jsonschemas
+
+[invenio_search.mappings]
+uct_theses = uct_theses.records.mappings
+
+[oarepo.models]
+uct_theses = uct_theses.models:model.json
+
+[oarepo.ui]
+uct_theses = uct_theses.models:ui.json
