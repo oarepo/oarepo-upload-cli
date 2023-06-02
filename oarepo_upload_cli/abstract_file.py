@@ -21,8 +21,10 @@ class AbstractFile(ABC):
     def modified(self):
         pass
     
+    @property
+    @abstractmethod
     def metadata(self):
-        return [{ 'key': self._key }]
+        pass
     
     @abstractmethod
     def get_reader(self):
