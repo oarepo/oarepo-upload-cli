@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from http import HTTPStatus
 import requests
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional
 
 from oarepo_upload_cli.abstract_file import AbstractFile
 from oarepo_upload_cli.abstract_record import AbstractRecord
@@ -154,11 +154,11 @@ class AbstractRepositoryRecordsHandler(ABC):
 
             response.raise_for_status()
         except requests.ConnectionError as conn_err:
-            raise RepositoryCommunicationException(ExceptionMessage.ConnectionError, conn_err) from conn_err
+            raise RepositoryCommunicationException(ExceptionMessage.ConnectionError, conn_err, response.text) from conn_err
         except requests.HTTPError as http_err:
-            raise RepositoryCommunicationException(ExceptionMessage.HTTPError, http_err) from http_err
+            raise RepositoryCommunicationException(ExceptionMessage.HTTPError, http_err, response.text) from http_err
         except Exception as err:
-            raise RepositoryCommunicationException(err.message, err) from err
+            raise RepositoryCommunicationException(err.message, err, response.text) from err
         
         return response
 

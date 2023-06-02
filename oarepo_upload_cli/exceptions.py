@@ -11,9 +11,10 @@ class RepositoryCommunicationException(Exception):
     Raised when there is a problem with requesting data from repository happens.
     """    
     
-    def __init__(self, message, error):
+    def __init__(self, message, error, payload):
         super().__init__(message)
         self._error = error
+        self._payload = payload
 
 class ExceptionMessage(Enum):
     """
