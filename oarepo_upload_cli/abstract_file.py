@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from datetime import datetime
 
 class AbstractFile(ABC):
     """
@@ -18,7 +19,7 @@ class AbstractFile(ABC):
     
     @property
     @abstractmethod
-    def modified(self):
+    def modified(self) -> datetime:
         pass
     
     @property
