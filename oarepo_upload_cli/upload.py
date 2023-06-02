@@ -91,6 +91,12 @@ def main(collection_url, source, repo_handler, modified_after, modified_before, 
 
     source_records = tqdm(source.get_records(modified_after, modified_before), total=approximate_records_count, disable=None)
     for source_record in source_records:
+        if source_record.deleted:
+            # Marked to delete.
+            repo_handler.delete_record(source_record)
+            
+            continue
+               
         # Get the repository version of this record.
         repository_record = repo_handler.get_record(source_record)
         if not repository_record:
