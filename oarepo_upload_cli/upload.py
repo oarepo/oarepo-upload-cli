@@ -3,6 +3,7 @@ import click
 from dataclasses import dataclass
 from datetime import datetime
 from dotenv import load_dotenv, find_dotenv
+from enum import Enum
 import os
 from tqdm import tqdm
 
@@ -14,6 +15,11 @@ from oarepo_upload_cli.repository_data_extractor import RepositoryDataExtractor
 class MetadataConfig:
     file_modified_field_name: str
     record_modified_field_name: str
+    
+class FileStatus(str, Enum):
+    # Based on: https://github.com/inveniosoftware/invenio-records-resources/blob/5335294dade21decea0f527022d96e12e1ffad52/invenio_records_resources/services/files/schema.py#L115
+    COMPLETED="completed"
+    PENDING="pending"
 
 @click.command()
 @click.option('--collection_url', help="Concrete collection URL address to synchronize records.")
@@ -125,7 +131,7 @@ def main(collection_url, source, repo_handler, modified_after, modified_before, 
             repository_file = [file for file in repository_records_files if file['key'] == key][0]
             
             last_repository_modification = datetime.fromisoformat(repository_file['metadata'][metadata_config.file_modified_field_name])
-            if last_repository_modification < source_file.modified:
+            if last_repository_modification < source_file.modified or repository_file['status'] == FileStatus.PENDING.value:
                 # Source's is newer, update.
                 repo_handler.upload_file(repository_record['links']['files'], source_file)
         
