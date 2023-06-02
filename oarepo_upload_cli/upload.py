@@ -124,7 +124,7 @@ def main(collection_url, source, repo_handler, modified_after, modified_before, 
             source_file = [file for file in source_record_files if file.key == key][0]
             repository_file = [file for file in repository_records_files if file['key'] == key][0]
             
-            last_repository_modification = datetime.fromisoformat(repository_file[metadata_config.file_modified_field_name])
+            last_repository_modification = datetime.fromisoformat(repository_file['metadata'][metadata_config.file_modified_field_name])
             if last_repository_modification < source_file.modified:
                 # Source's is newer, update.
                 repo_handler.upload_file(repository_record['links']['files'], source_file)
