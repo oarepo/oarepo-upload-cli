@@ -93,11 +93,12 @@ def main(collection_url, source, repo_handler, modified_after, modified_before, 
     for source_record in source_records:
         # Get the repository version of this record.
         repository_record = repo_handler.get_record(source_record)
-        record_self_link, record_files_link = repository_record['links']['self'], repository_record['links']['files']
         
         if source_record.deleted:
             # Marked to delete.
-            repo_handler.delete_record(record_self_link)
+            
+            if repository_record:
+                repo_handler.delete_record(repository_record['links']['self'])
             
             continue
         
@@ -107,13 +108,13 @@ def main(collection_url, source, repo_handler, modified_after, modified_before, 
             # Check for the update of record's metadata.
             last_metadata_modification = datetime.fromisoformat(repository_record['metadata'][metadata_config.record_modified_field_name])
             if modified_after < last_metadata_modification <= modified_before:
-                repo_handler.update_metadata(record_self_link, source_record.metadata)
+                repo_handler.update_metadata(repository_record['links']['self'], source_record.metadata)
         
         # ---------
         # - Files -
         # ---------
         source_record_files = source_record.files
-        repository_records_files = repo_handler.get_records_files(record_files_link)
+        repository_records_files = repo_handler.get_records_files(repository_record['links']['files'])
         
         source_files_keys = {file.key for file in source_record_files}
         repository_files_keys = {file['key'] for file in repository_records_files}
@@ -126,17 +127,17 @@ def main(collection_url, source, repo_handler, modified_after, modified_before, 
             last_repository_modification = datetime.fromisoformat(repository_file[metadata_config.file_modified_field_name])
             if last_repository_modification < source_file.modified:
                 # Source's is newer, update.
-                repo_handler.upload_file(record_files_link, source_file)
+                repo_handler.upload_file(repository_record['links']['files'], source_file)
         
         # Find files that are in source but not yet in repo, upload them.
         for key in source_files_keys.difference(repository_files_keys):
             source_file = [file for file in source_record_files if file.key == key][0]
-            repo_handler.upload_file(record_files_link, source_file)
+            repo_handler.upload_file(repository_record['links']['files'], source_file)
         
         # Delete files that are in repo and not in source.
         for key in repository_files_keys.difference(source_files_keys):
             repository_file = [file for file in repository_records_files if file.key == key][0]
-            repo_handler.delete_file(record_files_link, source_file)            
+            repo_handler.delete_file(repository_record['links']['files'], source_file)            
 
 if __name__ == "__main__":
     main()
