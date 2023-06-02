@@ -99,7 +99,9 @@ class AbstractRepositoryRecordsHandler(ABC):
         
         assert record.id is not None, "Record's identifier was not set."
         
-        record_url = f'{self._collection_url}{record.id}'
+        repository_record_metadata = self.get_record(record)
+        
+        record_url = f'{self._collection_url}{repository_record_metadata["id"]}'
         response = self._send_request('put', url=record_url, headers=self._headers, json=record.metadata.metadata, verify=False, auth=self._auth)
         
         response_payload = response.json()
