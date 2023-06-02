@@ -1,2 +1,0 @@
-tests
-uct_theses
