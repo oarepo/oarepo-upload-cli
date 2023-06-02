@@ -10,9 +10,11 @@ class AbstractRecord(ABC):
     """
 
     @abstractmethod
-    def __init__(self, updated: str, id: str = None):
+    def __init__(self, updated: str, id: str = None, deleted: bool = False):
         self._updated = updated
         self._id = id
+        
+        self._deleted = deleted
 
     @property
     @abstractmethod
@@ -34,10 +36,10 @@ class AbstractRecord(ABC):
         
         return self._id
 
-    @id.setter
-    def id(self, value):
+    @property
+    def deleted(self):
         """
-        Sets the given value as a new value of the record's ID.
+        Returns an indicator whether the record was deleted or not.
         """
         
-        self._id = value
+        return self._deleted

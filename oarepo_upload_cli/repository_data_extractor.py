@@ -14,8 +14,8 @@ class RepositoryDataExtractor:
     Sends, processes and returns data from a request sent to the given repository.
     """
 
-    def __init__(self, url: str, auth: BearerAuthentication):
-        self._url = url
+    def __init__(self, collection_url: str, auth: BearerAuthentication):
+        self._collection_url = collection_url
         self._auth = auth
 
     def get_data(self, path: Path) -> Any | None:
@@ -26,15 +26,15 @@ class RepositoryDataExtractor:
         """
 
         try:
-            response = requests.get(self._url, auth=self._auth)
+            response = requests.get(self._collection_url, auth=self._auth)
 
             response.raise_for_status()
         except requests.ConnectionError as conn_err:
             raise RepositoryCommunicationException(ExceptionMessage.ConnectionError, conn_err) from conn_err
         except requests.exceptions.HTTPError as http_err:
-            raise RepositoryCommunicationException(ExceptionMessage.HTTPError, http_err) from http_err
+            raise RepositoryCommunicationException(ExceptionMessage.HTTPError, http_err, response.text, url=self._collection_url) from http_err
         except Exception as err:
-            raise RepositoryCommunicationException(err) from err
+            raise RepositoryCommunicationException(err.message, err) from err
         
         try:
             content = response.json()

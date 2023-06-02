@@ -1,0 +1,36 @@
+
+
+2023-04-25 10:37:55.481713
+
+Processing model(s) ['model.yaml'] into output directory /Users/m/w/vscht/uct-repository/models/uct-theses
+
+    invenio index init --force
+            
+To install the data model, run
+    poetry install -E uct_theses            
+            
+Do not forget to run:
+    
+    # if the initial database does not exist yet 
+    invenio db init
+    
+    # if the tables do not exist yet (that is, after invenio db init); you have to manually remove 
+    # ucttheses_metadata and its versioned counterpart, otherwise
+    # alembic below will not work !
+    invenio db create 
+            
+    # create the branch
+    invenio alembic revision "Create uct_theses branch."  -b uct_theses -p dbdbc1b19cf2 --empty
+    
+    # apply the branch
+    invenio alembic upgrade heads
+    
+    # initial revision
+    invenio alembic revision "Initial revision." -b uct_theses
+    
+    # inspect the generated file and add import sqlalchemy_utils (invenio template does not contain it
+    # remove length=16 from UUIDType(length=16), replace Text() with sa.Text()
+    
+    # create db tables
+    invenio alembic upgrade heads
+            
