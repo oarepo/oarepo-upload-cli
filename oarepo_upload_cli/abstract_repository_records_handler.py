@@ -161,7 +161,7 @@ class AbstractRepositoryRecordsHandler(ABC):
         except requests.ConnectionError as conn_err:
             raise RepositoryCommunicationException(ExceptionMessage.ConnectionError, conn_err) from conn_err
         except requests.HTTPError as http_err:
-            raise RepositoryCommunicationException(ExceptionMessage.HTTPError, http_err, response.text) from http_err
+            raise RepositoryCommunicationException(ExceptionMessage.HTTPError, http_err, response.text, url=kwargs['url']) from http_err
         except Exception as err:
             raise RepositoryCommunicationException(err.message, err) from err
         
