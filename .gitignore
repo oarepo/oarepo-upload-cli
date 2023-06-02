@@ -3,3 +3,4 @@ oarepo_upload_cli.egg-info
 __pycache__
 .idea
 .env
+.venv_test
