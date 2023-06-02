@@ -116,8 +116,11 @@ class AbstractRepositoryRecordsHandler(ABC):
         assert record.id is not None, "Record's identifier was not set."
         assert file.key is not None, "File's key was not set."
         
+        repository_record_metadata = self.get_record(record)
+        repository_record_id = repository_record_metadata['id']
+        
         # POST the file metadata (a key).
-        post_files_url = f'{self._collection_url}{record.id}/files'
+        post_files_url = f'{self._collection_url}{repository_record_id}/files'
         post_request_data = file.metadata()
         
         post_response = self._send_request('post', url=post_files_url, headers=self._headers, json=post_request_data, verify=False, auth=self._auth)
