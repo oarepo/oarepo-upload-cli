@@ -22,7 +22,7 @@ class AbstractFile(ABC):
         pass
     
     def metadata(self):
-        return { 'key': self._key }
+        return [{ 'key': self._key }]
     
     @abstractmethod
     def get_reader(self):
