@@ -59,6 +59,20 @@ class AbstractRepositoryRecordsHandler(ABC):
             
             return        
 
+    def delete_record(self, record: AbstractRecord) -> Optional[bool]:
+        """
+        Tries to delete a given record.
+        """
+        
+        assert record.id is not None, "Record's identifier was not set."
+        
+        repository_record_metadata = self.get_record(record)
+        
+        record_url = f'{self._collection_url}{repository_record_metadata["id"]}'
+        self._send_request('delete', url=record_url, headers=self._headers, verify=False, auth=self._auth)
+        
+        return True        
+
     def get_record(self, record: AbstractRecord) -> Optional[object]:
         """
         Performs search request for the given record in the repository.
