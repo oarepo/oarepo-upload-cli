@@ -1,0 +1,19 @@
+# TODO: add your own file model definition here
+# example
+#files:
+#  use:
+#  - invenio_files
+#  properties:
+#    metadata:
+#      properties:
+#        title:
+#          type: fulltext
+#  package: thesis
+#  schema-server: 'local://'
+files:
+  use:
+  - invenio_files
+# normally there is no need to modify the settings bellow, but feel free
+  package: uct_theses
+  schema-server: 'local://'
+

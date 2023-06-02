@@ -1,0 +1,19 @@
+from uct_theses.resources.files.config import UctThesesFileResourceConfig
+from uct_theses.resources.files.resource import UctThesesFileResource
+from uct_theses.resources.records.config import UctThesesResourceConfig
+from uct_theses.resources.records.resource import UctThesesResource
+from uct_theses.services.files.config import UctThesesFileServiceConfig
+from uct_theses.services.files.service import UctThesesFileService
+from uct_theses.services.records.config import UctThesesServiceConfig
+from uct_theses.services.records.service import UctThesesService
+
+UCT_THESES_RESOURCE_CONFIG_UCT_THESES = UctThesesResourceConfig
+UCT_THESES_RESOURCE_CLASS_UCT_THESES = UctThesesResource
+UCT_THESES_SERVICE_CONFIG_UCT_THESES = UctThesesServiceConfig
+UCT_THESES_SERVICE_CLASS_UCT_THESES = UctThesesService
+
+
+UCT_THESES_RESOURCE_CONFIG_UCT_THESES_FILE = UctThesesFileResourceConfig
+UCT_THESES_RESOURCE_CLASS_UCT_THESES_FILE = UctThesesFileResource
+UCT_THESES_SERVICE_CONFIG_UCT_THESES_FILE = UctThesesFileServiceConfig
+UCT_THESES_SERVICE_CLASS_UCT_THESES_FILE = UctThesesFileService
