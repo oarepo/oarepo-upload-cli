@@ -4,6 +4,7 @@ import requests
 from typing import Dict, Optional
 
 from oarepo_upload_cli.abstract_file import AbstractFile
+from oarepo_upload_cli.abstract_metadata import AbstractMetadata
 from oarepo_upload_cli.abstract_record import AbstractRecord
 from oarepo_upload_cli.token_auth import BearerAuthentication
 from oarepo_upload_cli.exceptions import ExceptionMessage, RepositoryCommunicationException
@@ -33,15 +34,14 @@ class AbstractRepositoryRecordsHandler(ABC):
         response_payload = response.json()
         return response_payload
 
-    def delete_file(self, record: AbstractRecord, file: AbstractFile):
+    def delete_file(self, record_files_link: str, file: AbstractFile):
         """
         Tries to delete a given file of a given record by its key.
         """
         
-        assert record.id is not None, "Record's identifier was not set."
         assert file.key is not None, "File's key was not set."
         
-        file_url = f'{self._collection_url}{record.id}/{file.key}'
+        file_url = f'{self._collection_url}{record_files_link}/{file.key}'
         
         delete_response = self._send_request('delete', url=file_url, headers=self._headers, verify=False, auth=self._auth)
         
@@ -59,16 +59,12 @@ class AbstractRepositoryRecordsHandler(ABC):
             
             return        
 
-    def delete_record(self, record: AbstractRecord) -> Optional[bool]:
+    def delete_record(self, record_self_link: str) -> Optional[bool]:
         """
         Tries to delete a given record.
         """
         
-        assert record.id is not None, "Record's identifier was not set."
-        
-        repository_record_metadata = self.get_record(record)
-        
-        record_url = f'{self._collection_url}{repository_record_metadata["id"]}'
+        record_url = f'{self._collection_url}{record_self_link}'
         self._send_request('delete', url=record_url, headers=self._headers, verify=False, auth=self._auth)
         
         return True        
@@ -90,51 +86,36 @@ class AbstractRepositoryRecordsHandler(ABC):
         hits = response_payload['hits']['hits']
         return None if not hits else hits[0]
 
-    def get_records_files(self, record: AbstractRecord):
+    def get_records_files(self, record_files_link: str):
         """
         Returns metadata of a given record files.
         """
         
-        repository_record = self.get_record(record)
-        
-        assert repository_record is not None, "Record does not exist in the repository anymore."
-        
-        files_url = repository_record['links']['files']
-        records_files_url = f'{self._collection_url}{files_url}'
+        records_files_url = f'{self._collection_url}{record_files_link}'
         response = self._send_request('get', url=records_files_url, headers=self._headers, verify=False, auth=self._auth)
         
         record_repository_files = response.json()
         return record_repository_files['entries']
 
-    def update_metadata(self, record: AbstractRecord):
+    def update_metadata(self, record_self_link: str, new_metadata: AbstractMetadata):
         """
         Perform actualization of a given records metadata.
         """
         
-        assert record.id is not None, "Record's identifier was not set."
-        
-        repository_record_metadata = self.get_record(record)
-        
-        record_url = f'{self._collection_url}{repository_record_metadata["id"]}'
-        response = self._send_request('put', url=record_url, headers=self._headers, json=record.metadata.metadata, verify=False, auth=self._auth)
+        record_url = f'{self._collection_url}{record_self_link}'
+        response = self._send_request('put', url=record_url, headers=self._headers, json=new_metadata.metadata, verify=False, auth=self._auth)
         
         response_payload = response.json()
         return response_payload
 
-    def upload_file(self, record: AbstractRecord, file: AbstractFile):
+    def upload_file(self, record_files_link: str, file: AbstractFile):
         """
         Creates a file given by the file metadata of a given record if it does not exists yet.
         If it already exists, updates it.
         """
         
-        assert record.id is not None, "Record's identifier was not set."
-        assert file.key is not None, "File's key was not set."
-        
-        repository_record_metadata = self.get_record(record)
-        repository_record_id = repository_record_metadata['id']
-        
         # POST the file metadata (a key).
-        post_files_url = f'{self._collection_url}{repository_record_id}/files'
+        post_files_url = f'{self._collection_url}{record_files_link}/files'
         post_request_data = file.metadata()
         
         post_response = self._send_request('post', url=post_files_url, headers=self._headers, json=post_request_data, verify=False, auth=self._auth)
