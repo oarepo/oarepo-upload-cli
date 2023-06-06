@@ -7,7 +7,7 @@ from tqdm import tqdm
 from oarepo_upload_cli.config import Config
 from oarepo_upload_cli.entry_points_loader import EntryPointsLoader
 from oarepo_upload_cli.base.abstract_file import FileStatus
-from oarepo_upload_cli.repository_data_extractor import RepositoryDataExtractor
+from oarepo_upload_cli.repository.data_extractor import RepositoryDataExtractor
 
 @click.command()
 @click.option('--collection_url', help="Concrete collection URL address to synchronize records.")

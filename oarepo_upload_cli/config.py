@@ -19,11 +19,7 @@ class Config:
     
     @property
     def collection_url(self):
-        url = self._collection_url or os.getenv('COLLECTION_URL')
-        if not url.endswith('/'):
-            url += '/'
-            
-        return url
+        return self._collection_url or os.getenv('COLLECTION_URL')
     
     @property
     def entry_points_repo_handler(self):
