@@ -197,7 +197,7 @@ class AbstractRepositoryRecordsHandler(ABC):
     def _send_request(self, http_verb, **kwargs):
         try:
             request_method = getattr(globals()['requests'], http_verb)
-            headers = self._json_headers if 'headers' not in kwargs else kwargs['headers']
+            headers = kwargs.pop('headers', self._json_headers)
             
             res = request_method(verify=False, auth=self._config.auth, headers=headers, **kwargs)
             res.raise_for_status()
