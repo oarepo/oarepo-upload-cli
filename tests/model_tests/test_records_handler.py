@@ -2,7 +2,7 @@ from typing import Dict
 import pytest
 import requests
 
-from oarepo_upload_cli.abstract_repository_records_handler import AbstractRepositoryRecordsHandler
+from oarepo_upload_cli.base.abstract_repository_records_handler import AbstractRepositoryRecordsHandler
 from test_record import TestRecord
 
 class TestRepositoryRecordsHandler(AbstractRepositoryRecordsHandler):

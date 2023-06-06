@@ -1,7 +1,7 @@
 import datetime
 from typing import Iterable
 
-from oarepo_upload_cli.abstract_record_source import AbstractRecordSource
+from oarepo_upload_cli.base.abstract_record_source import AbstractRecordSource
 from test_record import TestRecord
 
 class TestSource(AbstractRecordSource):

@@ -1,4 +1,4 @@
-from oarepo_upload_cli.abstract_record import AbstractRecord
+from oarepo_upload_cli.base.abstract_record import AbstractRecord
 
 class TestRecord(AbstractRecord):
     # prevent pytest from trying to discover tests in the class
