@@ -3,8 +3,8 @@ from json import JSONDecodeError
 import requests
 from typing import Any, Deque
 
+from .config import Config
 from .exceptions import ExceptionMessage, RepositoryCommunicationException
-from .token_auth import BearerAuthentication
 
 Path = list[str]
 ResponseContent = dict
@@ -14,9 +14,8 @@ class RepositoryDataExtractor:
     Sends, processes and returns data from a request sent to the given repository.
     """
 
-    def __init__(self, collection_url: str, auth: BearerAuthentication):
-        self._collection_url = collection_url
-        self._auth = auth
+    def __init__(self, config: Config):
+        self._config = config
 
     def get_data(self, path: Path) -> Any | None:
         """
@@ -26,20 +25,21 @@ class RepositoryDataExtractor:
         """
 
         try:
-            response = requests.get(self._collection_url, auth=self._auth)
+            url = self._config.collection_url
+            response = requests.get(url, auth=self._config.bearer_token)
 
             response.raise_for_status()
         except requests.ConnectionError as conn_err:
-            raise RepositoryCommunicationException(ExceptionMessage.ConnectionError, conn_err) from conn_err
+            raise RepositoryCommunicationException(ExceptionMessage.ConnectionError.value, conn_err) from conn_err
         except requests.exceptions.HTTPError as http_err:
-            raise RepositoryCommunicationException(ExceptionMessage.HTTPError, http_err, response.text, url=self._collection_url) from http_err
+            raise RepositoryCommunicationException(ExceptionMessage.HTTPError.value, http_err, response.text, url=url) from http_err
         except Exception as err:
             raise RepositoryCommunicationException(err.message, err) from err
         
         try:
             content = response.json()
         except JSONDecodeError as serialization_err:
-            raise RepositoryCommunicationException(ExceptionMessage.JSONContentNotSerializable, serialization_err) from serialization_err
+            raise RepositoryCommunicationException(ExceptionMessage.JSONContentNotSerializable.value, serialization_err) from serialization_err
         
         found, invalid_path_item = self.__check_path(content, deque(path))
         if not found:

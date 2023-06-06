@@ -33,6 +33,9 @@ class AbstractFile(ABC):
         pass
     
 class FileStatus(str, Enum):
-    # Based on: https://github.com/inveniosoftware/invenio-records-resources/blob/5335294dade21decea0f527022d96e12e1ffad52/invenio_records_resources/services/files/schema.py#L115
+    """
+    Based on: https://github.com/inveniosoftware/invenio-records-resources/blob/5335294dade21decea0f527022d96e12e1ffad52/invenio_records_resources/services/files/schema.py#L115
+    """
+
     COMPLETED="completed"
     PENDING="pending"

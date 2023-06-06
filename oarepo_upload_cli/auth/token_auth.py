@@ -12,7 +12,3 @@ class TokenAuthentication(AuthBase):
     def __call__(self, req):
         req.headers[self.header_field] = f'{self.token}'
         return req
-
-class BearerAuthentication(TokenAuthentication):
-    def __init__(self, token: str):
-        super().__init__('Authorization', f'Bearer {token}')

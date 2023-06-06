@@ -7,14 +7,17 @@ class EntryPointsLoader():
     def __init__(self):
         self._group = 'oarepo_upload_cli.dependencies'
     
-    def load_entry_point(self, name: str):
+    def load_entry_point(self, name: str, default=None):
         """
         Tries to load an entry point given by argument value or 
         """
         ep = self.__load(self._group, name)
         
         if not ep:
-            raise EntryPointNotFoundException(ExceptionMessage.EntryPointNotProvided)
+            if default:
+                return default
+            
+            raise EntryPointNotFoundException()
         
         return ep.load()
     
@@ -25,4 +28,4 @@ class EntryPointsLoader():
             if ep.name == name:
                 return ep
 
-        raise ValueError(ExceptionMessage.EntryPointNotProvided)
+        raise ValueError(ExceptionMessage.EntryPointNotProvided.value)

@@ -3,19 +3,15 @@ from http import HTTPStatus
 import requests
 from typing import Dict, Optional
 
-from oarepo_upload_cli.abstract_file import AbstractFile
-from oarepo_upload_cli.abstract_metadata import AbstractMetadata
-from oarepo_upload_cli.abstract_record import AbstractRecord
-from oarepo_upload_cli.token_auth import BearerAuthentication
+from oarepo_upload_cli.base.abstract_file import AbstractFile
+from oarepo_upload_cli.base.abstract_metadata import AbstractMetadata
+from oarepo_upload_cli.base.abstract_record import AbstractRecord
+from oarepo_upload_cli.config import Config
 from oarepo_upload_cli.exceptions import ExceptionMessage, RepositoryCommunicationException
 
 class AbstractRepositoryRecordsHandler(ABC):
-    def __init__(self, collection_url: str, auth: BearerAuthentication):
-        if not collection_url.endswith('/'):
-            collection_url += '/'
-
-        self._auth = auth
-        self._collection_url = collection_url
+    def __init__(self, config: Config):
+        self._config = config
         self._headers = { "Content-Type": "application/json" }
     
     @abstractmethod
@@ -29,7 +25,7 @@ class AbstractRepositoryRecordsHandler(ABC):
         Returns created record metadata.
         """
         
-        response = self._send_request('post', url=self._collection_url, headers=self._headers, json=record.metadata.metadata, verify=False, auth=self._auth)
+        response = self._send_request('post', url=self._config.collection_url, headers=self._headers, json=record.metadata.metadata, verify=False, auth=self._config.bearer_token)
 
         response_payload = response.json()
         return response_payload
@@ -41,9 +37,9 @@ class AbstractRepositoryRecordsHandler(ABC):
         
         assert file.key is not None, "File's key was not set."
         
-        file_url = f'{self._collection_url}{record_files_link}/{file.key}'
+        file_url = f'{self._config.collection_url}{record_files_link}/{file.key}'
         
-        delete_response = self._send_request('delete', url=file_url, headers=self._headers, verify=False, auth=self._auth)
+        delete_response = self._send_request('delete', url=file_url, headers=self._headers, verify=False, auth=self._config.bearer_token)
         
         if delete_response.status_code != HTTPStatus.OK.value:
             # TODO: The file was not deleted correctly.
@@ -52,7 +48,7 @@ class AbstractRepositoryRecordsHandler(ABC):
         
         commit_url = f'{file_url}/commit'
         
-        commit_response = self._send_request('post', url=commit_url, headers=self._headers, verify=False, auth=self._auth)
+        commit_response = self._send_request('post', url=commit_url, headers=self._headers, verify=False, auth=self._config.bearer_token)
         
         if commit_response.status_code != HTTPStatus.OK.value:
             # TODO: The commit was not successful.
@@ -64,10 +60,10 @@ class AbstractRepositoryRecordsHandler(ABC):
         Tries to delete a given record.
         """
         
-        record_url = f'{self._collection_url}{record_self_link}'
-        self._send_request('delete', url=record_url, headers=self._headers, verify=False, auth=self._auth)
+        record_url = f'{self._config.collection_url}{record_self_link}'
+        self._send_request('delete', url=record_url, headers=self._headers, verify=False, auth=self._config.bearer_token)
         
-        return True        
+        return True
 
     def get_record(self, record: AbstractRecord) -> Optional[object]:
         """
@@ -80,7 +76,7 @@ class AbstractRepositoryRecordsHandler(ABC):
 
         params = self.get_id_query(record.id)
         
-        response = self._send_request('get', url=self._collection_url, params=params, headers=self._headers, verify=False, auth=self._auth)
+        response = self._send_request('get', url=self._config.collection_url, params=params, headers=self._headers, verify=False, auth=self._config.bearer_token)
         response_payload = response.json()
         
         hits = response_payload['hits']['hits']
@@ -91,8 +87,8 @@ class AbstractRepositoryRecordsHandler(ABC):
         Returns metadata of a given record files.
         """
         
-        records_files_url = f'{self._collection_url}{record_files_link}'
-        response = self._send_request('get', url=records_files_url, headers=self._headers, verify=False, auth=self._auth)
+        records_files_url = f'{self._config.collection_url}{record_files_link}'
+        response = self._send_request('get', url=records_files_url, headers=self._headers, verify=False, auth=self._config.bearer_token)
         
         record_repository_files = response.json()
         return record_repository_files['entries']
@@ -102,8 +98,8 @@ class AbstractRepositoryRecordsHandler(ABC):
         Perform actualization of a given records metadata.
         """
         
-        record_url = f'{self._collection_url}{record_self_link}'
-        response = self._send_request('put', url=record_url, headers=self._headers, json=new_metadata.metadata, verify=False, auth=self._auth)
+        record_url = f'{self._config.collection_url}{record_self_link}'
+        response = self._send_request('put', url=record_url, headers=self._headers, json=new_metadata.metadata, verify=False, auth=self._config.bearer_token)
         
         response_payload = response.json()
         return response_payload
@@ -115,10 +111,10 @@ class AbstractRepositoryRecordsHandler(ABC):
         """
         
         # POST the file metadata (a key).
-        post_files_url = f'{self._collection_url}{record_files_link}'
+        post_files_url = f'{self._config.collection_url}{record_files_link}'
         post_request_data = file.metadata
         
-        post_response = self._send_request('post', url=post_files_url, headers=self._headers, json=post_request_data, verify=False, auth=self._auth)
+        post_response = self._send_request('post', url=post_files_url, headers=self._headers, json=post_request_data, verify=False, auth=self._config.bearer_token)
         
         if post_response.status_code != HTTPStatus.OK.value:
             # TODO: The file metadata was not uploaded correctly.
@@ -130,7 +126,7 @@ class AbstractRepositoryRecordsHandler(ABC):
         put_headers = { "Content-Type": file.content_type }    
         put_request_data = file.get_reader()
         
-        put_response = self._send_request('put', url=put_content_url, headers=put_headers, json=put_request_data, verify=False, auth=self._auth)
+        put_response = self._send_request('put', url=put_content_url, headers=put_headers, json=put_request_data, verify=False, auth=self._config.bearer_token)
         
         if put_response.status_code != HTTPStatus.OK.value:
             # TODO: The file content was not uploaded correctly.
@@ -140,7 +136,7 @@ class AbstractRepositoryRecordsHandler(ABC):
         # POST commit.
         commit_url = f'{post_files_url}/{file.key}/commit'
         
-        commit_response = self._send_request('post', url=commit_url, headers=self._headers, verify=False, auth=self._auth)
+        commit_response = self._send_request('post', url=commit_url, headers=self._headers, verify=False, auth=self._config.bearer_token)
         
         if commit_response.status_code != HTTPStatus.OK.value:
             # TODO: The commit was not successful.
@@ -154,9 +150,9 @@ class AbstractRepositoryRecordsHandler(ABC):
 
             response.raise_for_status()
         except requests.ConnectionError as conn_err:
-            raise RepositoryCommunicationException(ExceptionMessage.ConnectionError, conn_err) from conn_err
+            raise RepositoryCommunicationException(ExceptionMessage.ConnectionError.value, conn_err) from conn_err
         except requests.HTTPError as http_err:
-            raise RepositoryCommunicationException(ExceptionMessage.HTTPError, http_err, response.text, url=kwargs['url']) from http_err
+            raise RepositoryCommunicationException(ExceptionMessage.HTTPError.value, http_err, response.text, url=kwargs['url']) from http_err
         except Exception as err:
             raise RepositoryCommunicationException(err.message, err) from err
         

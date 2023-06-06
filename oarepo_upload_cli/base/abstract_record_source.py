@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Iterable
 
-from oarepo_upload_cli.abstract_record import AbstractRecord
+from oarepo_upload_cli.base.abstract_record import AbstractRecord
 from oarepo_upload_cli.config import Config
 
 class AbstractRecordSource(ABC):

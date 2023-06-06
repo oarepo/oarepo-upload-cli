@@ -4,10 +4,9 @@ from datetime import datetime
 from dotenv import load_dotenv, find_dotenv
 from tqdm import tqdm
 
-from oarepo_upload_cli.token_auth import BearerAuthentication
 from oarepo_upload_cli.config import Config
 from oarepo_upload_cli.entry_points_loader import EntryPointsLoader
-from oarepo_upload_cli.abstract_file import FileStatus
+from oarepo_upload_cli.base.abstract_file import FileStatus
 from oarepo_upload_cli.repository_data_extractor import RepositoryDataExtractor
 
 @click.command()
@@ -17,8 +16,8 @@ from oarepo_upload_cli.repository_data_extractor import RepositoryDataExtractor
 @click.option('--repo_handler_name', help="Custom repository records handler.")
 @click.option('--modified_after', help="Timestamp that represents date after modification. If not specified, the last updated timestamp from repository will be used.")
 @click.option('--modified_before', help="Timestamp that represents date before modification.")
-@click.option('--token', help="SIS bearer authentication token.")
-def main(collection_url, config_name, source_name, repo_handler_name, modified_after, modified_before, token) -> None:
+@click.option('--bearer_token', help="SIS bearer authentication token.")
+def main(collection_url, config_name, source_name, repo_handler_name, modified_after, modified_before, bearer_token) -> None:
     # -------------------------
     # - Environment variables -
     # -------------------------
@@ -33,21 +32,14 @@ def main(collection_url, config_name, source_name, repo_handler_name, modified_a
     # - Configuration -
     # -----------------
     ep_loader = EntryPointsLoader()
-    config = ep_loader.load_entry_point(config_name)
-    if not config:
-        config = Config(token)
-
-    # ---------------------------
-    # - Authentication (Bearer) -
-    # ---------------------------
-    auth = BearerAuthentication(config.bearer_token)
-
+    config = ep_loader.load_entry_point(config_name, default=Config(bearer_token, collection_url))
+    
     # ----------------
     # - Entry points -
     # ----------------
-    source = ep_loader.load_entry_point(source_name)(config)
-    repo_handler = ep_loader.load_entry_point(repo_handler_name)(collection_url, auth)
-
+    source = ep_loader.load_entry_point(source_name)(config)    
+    repo_handler = ep_loader.load_entry_point(repo_handler_name)(config)
+    
     # --------------
     # - Timestamps -
     # --------------
@@ -58,7 +50,7 @@ def main(collection_url, config_name, source_name, repo_handler_name, modified_a
         modified_before = arrow.get(modified_before).datetime.replace(tzinfo=None)
     
     if not modified_after:
-        repo_data_extractor = RepositoryDataExtractor(collection_url, auth)
+        repo_data_extractor = RepositoryDataExtractor(config)
         modified_after = repo_data_extractor.get_data(path=['aggregations', 'max_date', 'value'])
     
     modified_after = arrow.get(modified_after).datetime.replace(tzinfo=None)
