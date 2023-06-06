@@ -26,7 +26,7 @@ class RepositoryDataExtractor:
 
         try:
             url = self._config.collection_url
-            response = requests.get(url, auth=self._config.bearer_token)
+            response = requests.get(url, auth=self._config.auth)
 
             response.raise_for_status()
         except requests.ConnectionError as conn_err:

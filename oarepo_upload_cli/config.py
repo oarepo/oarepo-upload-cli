@@ -10,10 +10,12 @@ class Config:
         self._source_name = source_name_arg
     
     @property
-    def bearer_token(self):
-        token = self._bearer_token or os.getenv('BEARER_TOKEN')
+    def auth(self):
+        return BearerAuthentication(self.bearer_token)
     
-        return BearerAuthentication(token)
+    @property
+    def bearer_token(self):
+        return self._bearer_token or os.getenv('BEARER_TOKEN')
     
     @property
     def collection_url(self):

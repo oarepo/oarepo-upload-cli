@@ -25,7 +25,7 @@ class AbstractRepositoryRecordsHandler(ABC):
         Returns created record metadata.
         """
         
-        response = self._send_request('post', url=self._config.collection_url, headers=self._headers, json=record.metadata.metadata, verify=False, auth=self._config.bearer_token)
+        response = self._send_request('post', url=self._config.collection_url, headers=self._headers, json=record.metadata.metadata, verify=False, auth=self._config.auth)
 
         response_payload = response.json()
         return response_payload
@@ -39,7 +39,7 @@ class AbstractRepositoryRecordsHandler(ABC):
         
         file_url = f'{self._config.collection_url}{record_files_link}/{file.key}'
         
-        delete_response = self._send_request('delete', url=file_url, headers=self._headers, verify=False, auth=self._config.bearer_token)
+        delete_response = self._send_request('delete', url=file_url, headers=self._headers, verify=False, auth=self._config.auth)
         
         if delete_response.status_code != HTTPStatus.OK.value:
             # TODO: The file was not deleted correctly.
@@ -48,7 +48,7 @@ class AbstractRepositoryRecordsHandler(ABC):
         
         commit_url = f'{file_url}/commit'
         
-        commit_response = self._send_request('post', url=commit_url, headers=self._headers, verify=False, auth=self._config.bearer_token)
+        commit_response = self._send_request('post', url=commit_url, headers=self._headers, verify=False, auth=self._config.auth)
         
         if commit_response.status_code != HTTPStatus.OK.value:
             # TODO: The commit was not successful.
@@ -61,7 +61,7 @@ class AbstractRepositoryRecordsHandler(ABC):
         """
         
         record_url = f'{self._config.collection_url}{record_self_link}'
-        self._send_request('delete', url=record_url, headers=self._headers, verify=False, auth=self._config.bearer_token)
+        self._send_request('delete', url=record_url, headers=self._headers, verify=False, auth=self._config.auth)
         
         return True
 
@@ -76,7 +76,7 @@ class AbstractRepositoryRecordsHandler(ABC):
 
         params = self.get_id_query(record.id)
         
-        response = self._send_request('get', url=self._config.collection_url, params=params, headers=self._headers, verify=False, auth=self._config.bearer_token)
+        response = self._send_request('get', url=self._config.collection_url, params=params, headers=self._headers, verify=False, auth=self._config.auth)
         response_payload = response.json()
         
         hits = response_payload['hits']['hits']
@@ -88,7 +88,7 @@ class AbstractRepositoryRecordsHandler(ABC):
         """
         
         records_files_url = f'{self._config.collection_url}{record_files_link}'
-        response = self._send_request('get', url=records_files_url, headers=self._headers, verify=False, auth=self._config.bearer_token)
+        response = self._send_request('get', url=records_files_url, headers=self._headers, verify=False, auth=self._config.auth)
         
         record_repository_files = response.json()
         return record_repository_files['entries']
@@ -99,7 +99,7 @@ class AbstractRepositoryRecordsHandler(ABC):
         """
         
         record_url = f'{self._config.collection_url}{record_self_link}'
-        response = self._send_request('put', url=record_url, headers=self._headers, json=new_metadata.metadata, verify=False, auth=self._config.bearer_token)
+        response = self._send_request('put', url=record_url, headers=self._headers, json=new_metadata.metadata, verify=False, auth=self._config.auth)
         
         response_payload = response.json()
         return response_payload
@@ -114,7 +114,7 @@ class AbstractRepositoryRecordsHandler(ABC):
         post_files_url = f'{self._config.collection_url}{record_files_link}'
         post_request_data = file.metadata
         
-        post_response = self._send_request('post', url=post_files_url, headers=self._headers, json=post_request_data, verify=False, auth=self._config.bearer_token)
+        post_response = self._send_request('post', url=post_files_url, headers=self._headers, json=post_request_data, verify=False, auth=self._config.auth)
         
         if post_response.status_code != HTTPStatus.OK.value:
             # TODO: The file metadata was not uploaded correctly.
@@ -126,7 +126,7 @@ class AbstractRepositoryRecordsHandler(ABC):
         put_headers = { "Content-Type": file.content_type }    
         put_request_data = file.get_reader()
         
-        put_response = self._send_request('put', url=put_content_url, headers=put_headers, json=put_request_data, verify=False, auth=self._config.bearer_token)
+        put_response = self._send_request('put', url=put_content_url, headers=put_headers, json=put_request_data, verify=False, auth=self._config.auth)
         
         if put_response.status_code != HTTPStatus.OK.value:
             # TODO: The file content was not uploaded correctly.
@@ -136,7 +136,7 @@ class AbstractRepositoryRecordsHandler(ABC):
         # POST commit.
         commit_url = f'{post_files_url}/{file.key}/commit'
         
-        commit_response = self._send_request('post', url=commit_url, headers=self._headers, verify=False, auth=self._config.bearer_token)
+        commit_response = self._send_request('post', url=commit_url, headers=self._headers, verify=False, auth=self._config.auth)
         
         if commit_response.status_code != HTTPStatus.OK.value:
             # TODO: The commit was not successful.
