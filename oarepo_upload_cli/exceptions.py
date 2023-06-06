@@ -1,10 +1,21 @@
 from enum import Enum
 
+class ExceptionMessage(str, Enum):
+    """
+    Collection of string representing exception error messages.
+    """
+    ConnectionError = 'Network problem has occurred'
+    EntryPointNotProvided = 'Entry point not provided'
+    HTTPError = 'HTTP error has occured'
+    JSONContentNotSerializable = 'Response could not be serialized'
+    MultipleEntryPoints = 'Multiple entry points present, can not choose one'
+
 class EntryPointNotFoundException(Exception):
     """
     Raise when an entry point is not defined.
     """
-    pass
+    def __init__(self):
+        super().__init__(ExceptionMessage.EntryPointNotProvided.value)
 
 class RepositoryCommunicationException(Exception):
     """
@@ -21,15 +32,3 @@ class RepositoryCommunicationException(Exception):
         
         if payload:
             print(f'Exception\'s payload: {payload}.')
-
-class ExceptionMessage(Enum):
-    """
-    Collection of string representing exception error messages.
-    """
-    AbstractSourceNotFound = 'Abstract record source has not been found'
-    AbstractRecordNotFound = 'Abstract record has not been found'
-    ConnectionError = 'Network problem has occurred'
-    EntryPointNotProvided = 'Entry point not provided'
-    HTTPError = 'HTTP error has occured'
-    JSONContentNotSerializable = 'Response could not be serialized'
-    MultipleEntryPoints = 'Multiple entry points present, can not choose one'

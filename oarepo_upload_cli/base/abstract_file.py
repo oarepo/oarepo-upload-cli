@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
+from enum import Enum
 
 class AbstractFile(ABC):
     """
@@ -30,3 +31,11 @@ class AbstractFile(ABC):
     @abstractmethod
     def get_reader(self):
         pass
+    
+class FileStatus(str, Enum):
+    """
+    Based on: https://github.com/inveniosoftware/invenio-records-resources/blob/5335294dade21decea0f527022d96e12e1ffad52/invenio_records_resources/services/files/schema.py#L115
+    """
+
+    COMPLETED="completed"
+    PENDING="pending"

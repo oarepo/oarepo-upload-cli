@@ -1,31 +1,23 @@
-from dataclasses import dataclass
 import importlib_metadata
 from typing import Any
 
-from .abstract_repository_records_handler import AbstractRepositoryRecordsHandler
-from .abstract_record_source import AbstractRecordSource
 from .exceptions import EntryPointNotFoundException, ExceptionMessage
 
-@dataclass
-class EntryPointsLoaderConfig:
-    group: str
-    source: str
-    repo_handler: str
-
 class EntryPointsLoader():
-    def __init__(self, config: EntryPointsLoaderConfig):
-        self._config = config
+    def __init__(self):
+        self._group = 'oarepo_upload_cli.dependencies'
     
-    def load_entry_point(self, config_value: str, arg: str=None):
+    def load_entry_point(self, name: str, default=None):
         """
         Tries to load an entry point given by argument value or 
         """
-        name = arg or config_value
-        
-        ep = self.__load(self._config.group, name)
+        ep = self.__load(self._group, name)
         
         if not ep:
-            raise EntryPointNotFoundException(ExceptionMessage.EntryPointNotProvided)
+            if default:
+                return default
+            
+            raise EntryPointNotFoundException()
         
         return ep.load()
     
@@ -36,4 +28,4 @@ class EntryPointsLoader():
             if ep.name == name:
                 return ep
 
-        raise ValueError(ExceptionMessage.EntryPointNotProvided)
+        raise ValueError(ExceptionMessage.EntryPointNotProvided.value)

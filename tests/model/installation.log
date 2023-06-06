@@ -1,0 +1,36 @@
+
+
+2022-11-10 14:40:36.252371
+
+Processing model model.yaml into output directory model
+
+    invenio index init --force
+            
+To install the data model, run
+    poetry install -E model            
+            
+Do not forget to run:
+    
+    # if the initial database does not exist yet 
+    invenio db init
+    
+    # if the tables do not exist yet (that is, after invenio db init); you have to manually remove 
+    # model_metadata and its versioned counterpart, otherwise
+    # alembic below will not work !
+    invenio db create 
+            
+    # create the branch
+    invenio alembic revision "Create model branch."  -b model -p dbdbc1b19cf2 --empty
+    
+    # apply the branch
+    invenio alembic upgrade heads
+    
+    # initial revision
+    invenio alembic revision "Initial revision." -b model
+    
+    # inspect the generated file and add import sqlalchemy_utils (invenio template does not contain it
+    # remove length=16 from UUIDType(length=16), replace Text() with sa.Text()
+    
+    # create db tables
+    invenio alembic upgrade heads
+            

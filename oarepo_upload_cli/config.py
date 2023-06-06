@@ -1,0 +1,38 @@
+import os
+
+from oarepo_upload_cli.auth.bearer_auth import BearerAuthentication
+
+class Config:
+    def __init__(self, bearer_token_arg: str=None, collection_url_arg: str=None, repo_handler_name_arg: str=None, source_name_arg: str=None):
+        self._bearer_token = bearer_token_arg
+        self._collection_url = collection_url_arg
+        self._repo_handler_name = repo_handler_name_arg
+        self._source_name = source_name_arg
+    
+    @property
+    def auth(self):
+        return BearerAuthentication(self.bearer_token)
+    
+    @property
+    def bearer_token(self):
+        return self._bearer_token or os.getenv('BEARER_TOKEN')
+    
+    @property
+    def collection_url(self):
+        return self._collection_url or os.getenv('COLLECTION_URL')
+    
+    @property
+    def entry_points_repo_handler(self):
+        return self._repo_handler_name or os.getenv('ENTRY_POINTS_REPO_HANDLER', 'repo_handler')
+    
+    @property
+    def entry_points_source(self):
+        return self._source_name or os.getenv('ENTRY_POINTS_SOURCE', 'source')
+    
+    @property
+    def file_modified_field_name(self):
+        return os.getenv('FILE_MODIFIED_FIELD_NAME', 'dateModified')
+    
+    @property
+    def record_modified_field_name(self):
+        return os.getenv('RECORD_MODIFIED_FIELD_NAME', 'dateModified')
