@@ -32,13 +32,15 @@ def main(collection_url, config_name, source_name, repo_handler_name, modified_a
     # - Configuration -
     # -----------------
     ep_loader = EntryPointsLoader()
-    config = ep_loader.load_entry_point(config_name, default=Config(bearer_token, collection_url))
+    
+    default_config = Config(bearer_token, collection_url, repo_handler_name, source_name)
+    config = ep_loader.load_entry_point(config_name, default=default_config)(bearer_token, collection_url, repo_handler_name, source_name)
     
     # ----------------
     # - Entry points -
     # ----------------
-    source = ep_loader.load_entry_point(source_name)(config)    
-    repo_handler = ep_loader.load_entry_point(repo_handler_name)(config)
+    source = ep_loader.load_entry_point(config.entry_points_source)(config)    
+    repo_handler = ep_loader.load_entry_point(config.entry_points_repo_handler)(config)
     
     # --------------
     # - Timestamps -

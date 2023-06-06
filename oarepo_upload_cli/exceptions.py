@@ -1,6 +1,6 @@
 from enum import Enum
 
-class ExceptionMessage(Enum, str):
+class ExceptionMessage(str, Enum):
     """
     Collection of string representing exception error messages.
     """

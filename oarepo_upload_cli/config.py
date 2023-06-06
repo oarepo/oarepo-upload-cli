@@ -3,9 +3,11 @@ import os
 from oarepo_upload_cli.auth.bearer_auth import BearerAuthentication
 
 class Config:
-    def __init__(self, bearer_token_arg: str=None, collection_url_arg: str=None):
+    def __init__(self, bearer_token_arg: str=None, collection_url_arg: str=None, repo_handler_name_arg: str=None, source_name_arg: str=None):
         self._bearer_token = bearer_token_arg
         self._collection_url = collection_url_arg
+        self._repo_handler_name = repo_handler_name_arg
+        self._source_name = source_name_arg
     
     @property
     def bearer_token(self):
@@ -23,11 +25,11 @@ class Config:
     
     @property
     def entry_points_repo_handler(self):
-        return os.getenv('ENTRY_POINTS_REPO_HANDLER', 'repo_handler')
+        return self._repo_handler_name or os.getenv('ENTRY_POINTS_REPO_HANDLER', 'repo_handler')
     
     @property
     def entry_points_source(self):
-        return os.getenv('ENTRY_POINTS_SOURCE', 'source')
+        return self._source_name or os.getenv('ENTRY_POINTS_SOURCE', 'source')
     
     @property
     def file_modified_field_name(self):
