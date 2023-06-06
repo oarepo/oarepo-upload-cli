@@ -104,7 +104,7 @@ def main(collection_url, config_name, source_name, repo_handler_name, modified_a
             last_repository_modification = datetime.fromisoformat(repository_file['metadata'][config.file_modified_field_name])
             if last_repository_modification < source_file.modified or repository_file['status'] == FileStatus.PENDING.value:
                 # Source's is newer, update.
-                repo_handler.upload_file(repository_record['links']['files'], source_file)
+                repo_handler.update_file(repository_record['links']['files'], source_file)
         
         # Find files that are in source but not yet in repo, upload them.
         for key in source_files_keys.difference(repository_files_keys):
