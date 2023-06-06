@@ -145,7 +145,7 @@ class AbstractRepositoryRecordsHandler(ABC):
         
         # POST the file metadata (a key).
         post_files_url = f'{self._config.collection_url}{record_files_link}'
-        post_request_data = file.metadata
+        post_request_data = [file.metadata]
         
         post_response = self._send_request('post', url=post_files_url, headers=self._headers, json=post_request_data, verify=False, auth=self._config.auth)
         
