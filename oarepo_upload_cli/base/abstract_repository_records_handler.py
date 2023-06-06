@@ -41,7 +41,7 @@ class AbstractRepositoryRecordsHandler(ABC):
             headers = { "Content-Type": file.content_type }    
             request_data = file.get_reader()
             
-            res = self._send_request('put', url=url, headers=headers, json=request_data)
+            res = self._send_request('put', url=url, headers=headers, data=request_data)
             if res.status_code != HTTPStatus.OK:
                 # TODO: The file content was not uploaded correctly.
                 
@@ -152,7 +152,7 @@ class AbstractRepositoryRecordsHandler(ABC):
         
         url = self._url_builder.record(record_self_link)
         
-        res = self._send_request('put', url=url, json=new_metadata.metadata)
+        res = self._send_request('put', url=url, data=new_metadata.metadata)
         res_payload = res.json()
         return res_payload
 
@@ -164,7 +164,7 @@ class AbstractRepositoryRecordsHandler(ABC):
         def put_metadata():
             url = self._url_builder.file(record_files_link, file.key)
         
-            res = self._send_request('put', url=url, json=file.metadata)
+            res = self._send_request('put', url=url, data=file.metadata)
             if res.status_code != HTTPStatus.OK:
                 # TODO: The file metadata was not updated correctly.
                 
