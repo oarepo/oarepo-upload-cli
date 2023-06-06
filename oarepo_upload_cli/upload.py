@@ -109,7 +109,7 @@ def main(collection_url, config_name, source_name, repo_handler_name, modified_a
         # Find files that are in source but not yet in repo, upload them.
         for key in source_files_keys.difference(repository_files_keys):
             source_file = [file for file in source_record_files if file.key == key][0]
-            repo_handler.upload_file(repository_record['links']['files'], source_file)
+            repo_handler.create_file(repository_record['links']['files'], source_file)
         
         # Delete files that are in repo and not in source.
         for key in repository_files_keys.difference(source_files_keys):

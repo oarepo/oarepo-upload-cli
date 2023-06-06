@@ -108,7 +108,7 @@ class AbstractRepositoryRecordsHandler(ABC):
         # PUT the newer file metadata.
         file_url = f'{self._config.collection_url}{record_files_link}/{file.key}'
         
-        put_updated_response = self._send_request('post', url=file_url, headers=self._headers, json=file.metadata, verify=False, auth=self._config.auth)
+        put_updated_response = self._send_request('put', url=file_url, headers=self._headers, json=file.metadata, verify=False, auth=self._config.auth)
         
         if put_updated_response.status_code != HTTPStatus.OK.value:
             # TODO: The file metadata was not updated correctly.
@@ -137,7 +137,7 @@ class AbstractRepositoryRecordsHandler(ABC):
             
             return
 
-    def upload_file(self, record_files_link: str, file: AbstractFile):
+    def create_file(self, record_files_link: str, file: AbstractFile):
         """
         Creates a file given by the file metadata of a given record if it does not exists yet.
         If it already exists, updates it.
