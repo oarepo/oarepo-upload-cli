@@ -18,6 +18,46 @@ class AbstractRepositoryRecordsHandler(ABC):
     def get_id_query(id: str) -> Dict[str, str]:
         pass
 
+    def create_file(self, record_files_link: str, file: AbstractFile):
+        """
+        Creates a file given by the file metadata of a given record if it does not exists yet.
+        If it already exists, updates it.
+        """
+        
+        # POST the file metadata (a key).
+        post_files_url = f'{self._config.collection_url}{record_files_link}'
+        post_request_data = [file.metadata]
+        
+        post_response = self._send_request('post', url=post_files_url, headers=self._headers, json=post_request_data, verify=False, auth=self._config.auth)
+        
+        if post_response.status_code != HTTPStatus.OK.value:
+            # TODO: The file metadata was not uploaded correctly.
+            
+            return
+        
+        # PUT content
+        put_content_url = f'{post_files_url}/{file.key}/content'
+        put_headers = { "Content-Type": file.content_type }    
+        put_request_data = file.get_reader()
+        
+        put_response = self._send_request('put', url=put_content_url, headers=put_headers, json=put_request_data, verify=False, auth=self._config.auth)
+        
+        if put_response.status_code != HTTPStatus.OK.value:
+            # TODO: The file content was not uploaded correctly.
+            
+            return
+        
+        # POST commit.
+        commit_url = f'{post_files_url}/{file.key}/commit'
+        
+        commit_response = self._send_request('post', url=commit_url, headers=self._headers, verify=False, auth=self._config.auth)
+        
+        if commit_response.status_code != HTTPStatus.OK.value:
+            # TODO: The commit was not successful.
+            
+            return
+
+
     def create_record(self, record: AbstractRecord) -> Optional[str]:
         """
         Creates a record in the repository with the given metadata.
@@ -120,7 +160,7 @@ class AbstractRepositoryRecordsHandler(ABC):
         put_headers = { "Content-Type": file.content_type }    
         put_request_data = file.get_reader()
         
-        put_response = self._send_request('put', url=put_content_url, headers=put_headers, json=put_request_data, verify=False, auth=self._config.auth)
+        put_response = self._send_request('put', url=put_content_url, headers=put_headers, data=put_request_data, verify=False, auth=self._config.auth)
         
         if put_response.status_code != HTTPStatus.OK.value:
             # TODO: The file content was not uploaded correctly.
@@ -129,45 +169,6 @@ class AbstractRepositoryRecordsHandler(ABC):
         
         # POST commit.
         commit_url = f'{file_url}/commit'
-        
-        commit_response = self._send_request('post', url=commit_url, headers=self._headers, verify=False, auth=self._config.auth)
-        
-        if commit_response.status_code != HTTPStatus.OK.value:
-            # TODO: The commit was not successful.
-            
-            return
-
-    def create_file(self, record_files_link: str, file: AbstractFile):
-        """
-        Creates a file given by the file metadata of a given record if it does not exists yet.
-        If it already exists, updates it.
-        """
-        
-        # POST the file metadata (a key).
-        post_files_url = f'{self._config.collection_url}{record_files_link}'
-        post_request_data = [file.metadata]
-        
-        post_response = self._send_request('post', url=post_files_url, headers=self._headers, json=post_request_data, verify=False, auth=self._config.auth)
-        
-        if post_response.status_code != HTTPStatus.OK.value:
-            # TODO: The file metadata was not uploaded correctly.
-            
-            return
-        
-        # PUT content
-        put_content_url = f'{post_files_url}/{file.key}/content'
-        put_headers = { "Content-Type": file.content_type }    
-        put_request_data = file.get_reader()
-        
-        put_response = self._send_request('put', url=put_content_url, headers=put_headers, json=put_request_data, verify=False, auth=self._config.auth)
-        
-        if put_response.status_code != HTTPStatus.OK.value:
-            # TODO: The file content was not uploaded correctly.
-            
-            return
-        
-        # POST commit.
-        commit_url = f'{post_files_url}/{file.key}/commit'
         
         commit_response = self._send_request('post', url=commit_url, headers=self._headers, verify=False, auth=self._config.auth)
         
