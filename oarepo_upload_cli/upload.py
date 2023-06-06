@@ -1,34 +1,24 @@
 import arrow
 import click
-from dataclasses import dataclass
 from datetime import datetime
 from dotenv import load_dotenv, find_dotenv
-from enum import Enum
-import os
 from tqdm import tqdm
 
 from oarepo_upload_cli.token_auth import BearerAuthentication
-from oarepo_upload_cli.entry_points_loader import EntryPointsLoaderConfig, EntryPointsLoader
+from oarepo_upload_cli.config import Config
+from oarepo_upload_cli.entry_points_loader import EntryPointsLoader
+from oarepo_upload_cli.abstract_file import FileStatus
 from oarepo_upload_cli.repository_data_extractor import RepositoryDataExtractor
-
-@dataclass
-class MetadataConfig:
-    file_modified_field_name: str
-    record_modified_field_name: str
-    
-class FileStatus(str, Enum):
-    # Based on: https://github.com/inveniosoftware/invenio-records-resources/blob/5335294dade21decea0f527022d96e12e1ffad52/invenio_records_resources/services/files/schema.py#L115
-    COMPLETED="completed"
-    PENDING="pending"
 
 @click.command()
 @click.option('--collection_url', help="Concrete collection URL address to synchronize records.")
-@click.option('--source', help="Record source entry point path.")
-@click.option('--repo_handler', help="Custom repository records handler.")
+@click.option('--config_name', help="Configuration entry point path.")
+@click.option('--source_name', help="Record source entry point path.")
+@click.option('--repo_handler_name', help="Custom repository records handler.")
 @click.option('--modified_after', help="Timestamp that represents date after modification. If not specified, the last updated timestamp from repository will be used.")
 @click.option('--modified_before', help="Timestamp that represents date before modification.")
 @click.option('--token', help="SIS bearer authentication token.")
-def main(collection_url, source, repo_handler, modified_after, modified_before, token) -> None:
+def main(collection_url, config_name, source_name, repo_handler_name, modified_after, modified_before, token) -> None:
     # -------------------------
     # - Environment variables -
     # -------------------------
@@ -39,43 +29,30 @@ def main(collection_url, source, repo_handler, modified_after, modified_before, 
         
         return
 
-    # --------------------------
-    # - Metadata configuration -
-    # --------------------------
-    metadata_config = MetadataConfig(
-        file_modified_field_name=os.getenv('FILE_MODIFIED_FIELD_NAME', 'dateModified'),
-        record_modified_field_name=os.getenv('RECORD_MODIFIED_FIELD_NAME', 'dateModified')
-    )
+    # -----------------
+    # - Configuration -
+    # -----------------
+    ep_loader = EntryPointsLoader()
+    config = ep_loader.load_entry_point(config_name)
+    if not config:
+        config = Config(token)
 
     # ---------------------------
     # - Authentication (Bearer) -
     # ---------------------------
-    bearer_token = token or os.getenv('BEARER_TOKEN')
-    if not bearer_token:
-        print('Bearer token is missing.')
-        
-        return
-
-    auth = BearerAuthentication(bearer_token)
+    auth = BearerAuthentication(config.bearer_token)
 
     # ----------------
     # - Entry points -
     # ----------------
-    ep_config = EntryPointsLoaderConfig(
-        group=os.getenv('ENTRY_POINTS_GROUP', 'oarepo_upload_cli.dependencies'),
-        source=os.getenv('ENTRY_POINTS_SOURCE', 'source'),
-        repo_handler=os.getenv('ENTRY_POINTS_REPO_HANDLER', 'repo_handler')        
-    )
-        
-    ep_loader = EntryPointsLoader(config=ep_config)
-    source = ep_loader.load_entry_point(config_value=ep_config.source, arg=source)()
-    repo_handler = ep_loader.load_entry_point(config_value=ep_config.repo_handler, arg=repo_handler)(collection_url, auth)
+    source = ep_loader.load_entry_point(source_name)(config)
+    repo_handler = ep_loader.load_entry_point(repo_handler_name)(collection_url, auth)
 
     # --------------
     # - Timestamps -
     # --------------
     if not modified_before:
-        # set modified before to current datetime
+        # set modified_before to current datetime
         modified_before = datetime.utcnow()
     else:
         modified_before = arrow.get(modified_before).datetime.replace(tzinfo=None)
@@ -112,7 +89,7 @@ def main(collection_url, source, repo_handler, modified_after, modified_before, 
             repository_record = repo_handler.create_record(source_record)
         else:
             # Check for the update of record's metadata.
-            last_metadata_modification = datetime.fromisoformat(repository_record['metadata'][metadata_config.record_modified_field_name])
+            last_metadata_modification = datetime.fromisoformat(repository_record['metadata'][config.record_modified_field_name])
             if modified_after < last_metadata_modification <= modified_before:
                 repo_handler.update_metadata(repository_record['links']['self'], source_record.metadata)
         
@@ -130,7 +107,7 @@ def main(collection_url, source, repo_handler, modified_after, modified_before, 
             source_file = [file for file in source_record_files if file.key == key][0]
             repository_file = [file for file in repository_records_files if file['key'] == key][0]
             
-            last_repository_modification = datetime.fromisoformat(repository_file['metadata'][metadata_config.file_modified_field_name])
+            last_repository_modification = datetime.fromisoformat(repository_file['metadata'][config.file_modified_field_name])
             if last_repository_modification < source_file.modified or repository_file['status'] == FileStatus.PENDING.value:
                 # Source's is newer, update.
                 repo_handler.upload_file(repository_record['links']['files'], source_file)
