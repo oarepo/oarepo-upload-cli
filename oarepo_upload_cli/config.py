@@ -63,7 +63,8 @@ class Config:
         )
 
     def override(self, section, option, value):
-        self.config[section][option] = value
+        if value:
+            self.config[section][option] = value
 
     def ensure_defined(self, section, config_key, os_environ_key):
         ret = self.config[section].get(config_key) or os.getenv(os_environ_key)
