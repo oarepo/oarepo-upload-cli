@@ -5,3 +5,5 @@ __pycache__
 uct_theses/uct_theses.egg-info
 .venv*
 simple-server
+.token
+tmp.error.log

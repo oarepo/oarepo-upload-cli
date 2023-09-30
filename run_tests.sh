@@ -79,7 +79,7 @@ EOF
     invenio db create
     invenio index destroy --yes-i-know || true
     invenio index init --force
-    invenio files location create --default default file:simple-server/files
+    invenio files location create --default default ./simple-server/files
 
     invenio users create -a -c test@test.com --password testtest
     invenio tokens create -n test -u test@test.com >.token
