@@ -1,21 +1,15 @@
+from abc import abstractmethod
 from json import JSONDecodeError
+from typing import Any, Dict, Optional, Union
 
 import requests
 
-from oarepo_upload_cli.base.repository import (
-    RepositoryClient,
-    RepositoryRecord,
-)
-
-from abc import abstractmethod
-from typing import Dict, Optional, Union, Any
-
+from oarepo_upload_cli.base.repository import RepositoryClient, RepositoryRecord
 from oarepo_upload_cli.base.source import SourceRecord
 from oarepo_upload_cli.exceptions import (
-    RepositoryCommunicationException,
     ExceptionMessage,
+    RepositoryCommunicationException,
 )
-
 from oarepo_upload_cli.invenio.connection import InvenioConnection
 from oarepo_upload_cli.invenio.record import InvenioRepositoryRecord
 

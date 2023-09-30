@@ -1,8 +1,8 @@
 import requests
 
 from oarepo_upload_cli.exceptions import (
-    RepositoryCommunicationException,
     ExceptionMessage,
+    RepositoryCommunicationException,
 )
 
 

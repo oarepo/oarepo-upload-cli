@@ -1,8 +1,7 @@
-from typing import Any
 
 import importlib_metadata
 
-from .exceptions import EntryPointNotFoundException, ExceptionMessage
+from .exceptions import ExceptionMessage
 
 
 class EntryPointsLoader:

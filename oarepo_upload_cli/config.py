@@ -1,7 +1,7 @@
+import configparser
 import os
 
 from oarepo_upload_cli.auth.bearer_auth import BearerAuthentication
-import configparser
 
 
 class Config:

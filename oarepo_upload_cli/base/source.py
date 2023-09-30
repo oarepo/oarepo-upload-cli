@@ -1,10 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import List, Union, Dict
-
 from datetime import datetime
-from typing import Iterable
+from typing import Iterable, List
 
 from oarepo_upload_cli.config import Config
+
 from ..types import JsonType
 
 

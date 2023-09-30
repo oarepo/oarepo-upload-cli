@@ -1,14 +1,9 @@
-import copy
-import datetime
 import json
 from typing import Dict, Optional
 
-from oarepo_upload_cli.types import JsonType
 from oarepo_upload_cli.base.repository import RepositoryClient, RepositoryRecord
-from oarepo_upload_cli.base.source import (
-    SourceRecord,
-    SourceRecordFile,
-)
+from oarepo_upload_cli.base.source import SourceRecord, SourceRecordFile
+from oarepo_upload_cli.types import JsonType
 
 
 class DryRepositoryRecord(RepositoryRecord):

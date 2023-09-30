@@ -1,13 +1,10 @@
-import datetime
 from typing import Dict, Optional
 
 import pytest
 import requests
 from test_record import TestRecord
 
-from oarepo_upload_cli.base.repository import (
-    AbstractRepositoryRecordsHandler,
-)
+from oarepo_upload_cli.base.repository import AbstractRepositoryRecordsHandler
 
 
 class TestRepositoryRecordsHandler(AbstractRepositoryRecordsHandler):

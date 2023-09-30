@@ -1,14 +1,13 @@
 import dataclasses
-from abc import abstractmethod
 from datetime import datetime
 from functools import cached_property
 from typing import Dict
 from urllib.parse import urljoin
 
-from oarepo_upload_cli.types import JsonType
-from oarepo_upload_cli.base.repository import RepositoryRecord, RepositoryFile
+from oarepo_upload_cli.base.repository import RepositoryFile, RepositoryRecord
 from oarepo_upload_cli.base.source import SourceRecordFile
 from oarepo_upload_cli.invenio.connection import InvenioConnection
+from oarepo_upload_cli.types import JsonType
 
 
 @dataclasses.dataclass

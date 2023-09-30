@@ -1,13 +1,10 @@
-from abc import ABC, abstractmethod, abstractproperty
+from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Dict, Optional
 
-from oarepo_upload_cli.types import JsonType
-from oarepo_upload_cli.base.source import (
-    SourceRecord,
-    SourceRecordFile,
-)
+from oarepo_upload_cli.base.source import SourceRecord, SourceRecordFile
 from oarepo_upload_cli.config import Config
+from oarepo_upload_cli.types import JsonType
 
 
 class RepositoryFile(ABC):
@@ -88,7 +85,6 @@ class RepositoryClient(ABC):
 
         Returns created record metadata.
         """
-        pass
 
     def delete_record(self, record: RepositoryRecord):
         """
