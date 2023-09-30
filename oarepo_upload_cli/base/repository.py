@@ -1,4 +1,6 @@
+import dataclasses
 from abc import ABC, abstractmethod
+from datetime import datetime
 from enum import Enum
 from typing import Dict, Optional
 
@@ -7,16 +9,9 @@ from oarepo_upload_cli.config import Config
 from oarepo_upload_cli.types import JsonType
 
 
-class RepositoryFile(ABC):
-    @property
-    @abstractmethod
-    def datetime_modified(self):
-        pass
-
-    @property
-    @abstractmethod
-    def key(self):
-        pass
+@dataclasses.dataclass
+class RepositoryFile:
+    key: str
 
 
 class RepositoryRecord(ABC):
@@ -36,7 +31,7 @@ class RepositoryRecord(ABC):
         return {}
 
     @abstractmethod
-    def create_update_file(self, file: SourceRecordFile):
+    def create_update_file(self, file: SourceRecordFile) -> bool:
         pass
 
     @abstractmethod

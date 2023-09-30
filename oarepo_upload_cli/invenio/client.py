@@ -15,20 +15,22 @@ from oarepo_upload_cli.invenio.record import InvenioRepositoryRecord
 
 
 class InvenioRepositoryClient(RepositoryClient):
+    record_class = InvenioRepositoryRecord
+
     def __init__(self, config):
         super().__init__(config)
         self.connection = InvenioConnection(config.auth)
 
     @abstractmethod
     def get_id_query(self, source_record_id: str) -> Dict[str, str]:
-        pass
+        raise NotImplementedError("ID query not implemented")
 
     @abstractmethod
     def get_last_modification_date(self) -> Optional[str]:
-        pass
+        raise NotImplementedError("Last modification date not implemented")
 
     def get_record(self, record: SourceRecord) -> RepositoryRecord:
-        params = self.get_id_query(record.id)
+        params = self.get_id_query(record.record_id)
 
         res = self.connection.get(url=self._config.collection_url, params=params)
 
@@ -36,7 +38,7 @@ class InvenioRepositoryClient(RepositoryClient):
         hits = res_payload["hits"]["hits"]
 
         if hits:
-            return InvenioRepositoryRecord(
+            return self.record_class(
                 self.connection,
                 self._config.collection_url,
                 hits[0],
@@ -48,7 +50,7 @@ class InvenioRepositoryClient(RepositoryClient):
         res = self.connection.post(
             url=self._config.collection_url, json=record.metadata
         )
-        return InvenioRepositoryRecord(
+        return self.record_class(
             self.connection,
             self._config.collection_url,
             res.json(),

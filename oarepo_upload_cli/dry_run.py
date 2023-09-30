@@ -16,14 +16,15 @@ class DryRepositoryRecord(RepositoryRecord):
 
     @property
     def record_id(self):
-        return self.record.id
+        return self.record.record_id
 
     @property
     def files(self):
         return []
 
-    def create_update_file(self, file: SourceRecordFile):
+    def create_update_file(self, file: SourceRecordFile) -> bool:
         print(f"Creating or updating file {file.key} of record {self.record_id}")
+        return True
 
     def create_file(self, file: SourceRecordFile):
         print(f"Creating file {file.key} of record {self.record_id}")

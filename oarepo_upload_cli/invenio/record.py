@@ -22,10 +22,6 @@ class InvenioRepositoryFile(RepositoryFile):
                 self.metadata["metadata"][self.file_modified_field_name]
             )
 
-    @property
-    def key(self):
-        return self.metadata["key"]
-
 
 @dataclasses.dataclass
 class InvenioRepositoryRecord(RepositoryRecord):
@@ -38,7 +34,7 @@ class InvenioRepositoryRecord(RepositoryRecord):
     @cached_property
     def files(self) -> Dict[str, InvenioRepositoryFile]:
         return {
-            x["key"]: InvenioRepositoryFile(x, self.file_modified_field_name)
+            x["key"]: InvenioRepositoryFile(x["key"], x, self.file_modified_field_name)
             for x in self.connection.get(self.link_url("files")).json()["entries"]
         }
 
@@ -69,7 +65,7 @@ class InvenioRepositoryRecord(RepositoryRecord):
     def update_metadata(self, new_metadata: Dict[str, JsonType]):
         self.metadata = self.connection.put(url=self.self_url, json=new_metadata).json()
 
-    def create_update_file(self, file: SourceRecordFile):
+    def create_update_file(self, file: SourceRecordFile) -> bool:
         existing_file: RepositoryFile
         if file.key in self.files:
             existing_file = self.files[file.key]
@@ -78,16 +74,17 @@ class InvenioRepositoryRecord(RepositoryRecord):
                 and existing_file.datetime_modified >= file.datetime_modified
             ):
                 # no need to update
-                return
+                return False
 
             # invenio can not perform update, so at first delete and then create
             self.delete_file(file)
 
-        return self.create_file(file)
+        self.create_file(file)
+        return True
 
     def create_file(self, file: SourceRecordFile):
         # raises exception on error
-        self.connection.post(url=self.files_url, json=[{"key": file.metadata["key"]}])
+        self.connection.post(url=self.files_url, json=[{"key": file.key}])
         self.update_file(file)
 
     def update_file(self, file: SourceRecordFile):
@@ -109,9 +106,12 @@ class InvenioRepositoryRecord(RepositoryRecord):
         self.connection.post(commit_url)
 
         # reread the metadata to make sure they have been uploaded
-        self.files[file.key] = InvenioRepositoryFile(
-            self.connection.get(url), self.file_modified_field_name
+        repository_file = InvenioRepositoryFile(
+            key=file.key,
+            metadata=self.connection.get(url),
+            file_modified_field_name=self.file_modified_field_name,
         )
+        self.files[file.key] = repository_file
 
     def delete_file(self, file: SourceRecordFile):
         url = f"{self.files_url}/{file.key}"

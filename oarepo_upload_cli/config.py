@@ -5,16 +5,18 @@ from oarepo_upload_cli.auth.bearer_auth import BearerAuthentication
 
 
 class Config:
-    def __init__(self, init_file_path):
+    def __init__(self, init_file_path=None, *overrides):
         config = configparser.ConfigParser()
-        if os.path.exists(init_file_path):
-            config.read_file(init_file_path)
+        if init_file_path and os.path.exists(init_file_path):
+            config.read(init_file_path)
 
         for section in ("authentication", "repository", "entrypoints"):
             if not config.has_section(section):
                 config.add_section(section)
 
         self.config = config
+        for override in overrides:
+            self.override(*override)
 
     @property
     def auth(self):

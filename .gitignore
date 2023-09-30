@@ -2,7 +2,6 @@ build
 oarepo_upload_cli.egg-info
 __pycache__
 .idea
-.env
-.venv_test
 uct_theses/uct_theses.egg-info
-.venv
+.venv*
+simple-server
