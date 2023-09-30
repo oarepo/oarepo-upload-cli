@@ -1,7 +1,7 @@
 import dataclasses
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Dict, Iterable, List
+from typing import Iterable, List
 
 from oarepo_upload_cli.config import Config
 

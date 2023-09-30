@@ -1,9 +1,8 @@
 from datetime import datetime
 from io import BytesIO
-from typing import Dict, Iterable
+from typing import Iterable
 
 from oarepo_upload_cli.base.source import RecordSource, SourceRecord, SourceRecordFile
-from oarepo_upload_cli.types import JsonType
 
 
 class TestFile(SourceRecordFile):
