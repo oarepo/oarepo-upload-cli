@@ -1,0 +1,25 @@
+plugins:
+  packages:
+  - oarepo-model-builder-files==4.*
+profiles:
+- record
+- files
+record:
+  module:
+    qualified: simple_model
+  resource-config:
+    base-url: /simple/
+  permissions:
+    presets:
+    - authenticated
+  use:
+  - invenio
+  properties:
+    metadata:
+      properties:
+        title: keyword
+        originalId: keyword
+        dateModified: datetime
+  files:
+    properties:
+      dateModified: datetime

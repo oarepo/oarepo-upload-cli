@@ -1,3 +1,11 @@
 build
 oarepo_upload_cli.egg-info
 __pycache__
+.idea
+uct_theses/uct_theses.egg-info
+.venv*
+simple-server
+.token
+tmp.error.log
+.DS_Store
+dist
