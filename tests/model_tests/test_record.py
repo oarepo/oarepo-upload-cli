@@ -1,6 +1,7 @@
-from oarepo_upload_cli.base.abstract_record import AbstractRecord
+from oarepo_upload_cli.base.source import SourceRecord
 
-class TestRecord(AbstractRecord):
+
+class TestRecord(SourceRecord):
     # prevent pytest from trying to discover tests in the class
     __test__ = False
 
@@ -9,7 +10,7 @@ class TestRecord(AbstractRecord):
         self._id = id
 
     def get_metadata(self):
-        return { "metadata": { "updated": self._updated } }
+        return {"metadata": {"updated": self._updated}}
 
     @property
     def id(self):

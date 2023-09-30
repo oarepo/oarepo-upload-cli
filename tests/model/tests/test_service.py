@@ -4,7 +4,6 @@ import pytest
 import pytz
 from invenio_access.permissions import system_identity
 from invenio_pidstore.errors import PIDDeletedError, PIDDoesNotExistError
-
 from model.proxies import current_service
 
 

@@ -9,7 +9,6 @@ from invenio_accounts.proxies import current_datastore
 from invenio_accounts.testutils import login_user_via_session
 from invenio_app.factory import create_api
 from invenio_records_resources.services.uow import RecordCommitOp, UnitOfWork
-
 from model.proxies import current_service
 from model.records.api import ModelRecord
 

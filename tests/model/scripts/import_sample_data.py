@@ -5,7 +5,6 @@ from pathlib import Path
 import yaml
 from invenio_access.permissions import system_identity
 from invenio_app.factory import create_api
-
 from model.proxies import current_service
 
 

@@ -1,5 +1,6 @@
 from requests.auth import AuthBase
 
+
 class TokenAuthentication(AuthBase):
     """
     Implements a custom token-based authentication.
@@ -10,5 +11,5 @@ class TokenAuthentication(AuthBase):
         self.token = token
 
     def __call__(self, req):
-        req.headers[self.header_field] = f'{self.token}'
+        req.headers[self.header_field] = f"{self.token}"
         return req

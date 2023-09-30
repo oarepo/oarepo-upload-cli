@@ -19,10 +19,6 @@ python3.10 -m venv .venv-upload-cli
 
 The package provides multiple ways how to supply the authentication token.
 
-#### Command line argument
-
-Traditionally, you can specify the token by using `--t` following by the token itself.
-
 #### Ini file
 
 In order for the configuration file to be parsed correctly, create the file following these rules:

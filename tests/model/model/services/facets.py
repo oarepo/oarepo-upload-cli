@@ -1,10 +1,11 @@
 """Facet definitions."""
 
-from elasticsearch_dsl import A, Facet
+from elasticsearch_dsl import Facet
 from elasticsearch_dsl.query import Nested
 from invenio_records_resources.services.records.facets import TermsFacet
 
 from .max_facet import MaxFacet
+
 
 class NestedLabeledFacet(Facet):
     agg_type = "nested"
