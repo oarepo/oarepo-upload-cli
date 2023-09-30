@@ -43,28 +43,25 @@ class Uploader:
         for record_cnt, source_record in enumerate(
             self.source.get_records(modified_after, modified_before)
         ):
-            repository_record = self._create_update_record_metadata(
-                source_record,
-                lambda msg: callback(
+
+            def local_callback(msg):
+                callback(
                     source_record,
                     record_cnt,
                     approximate_records_count,
                     msg,
-                ),
+                )
+
+            repository_record = self._create_update_record_metadata(
+                source_record,
+                local_callback,
             )
 
             if not repository_record:
                 continue
 
             self._create_update_record_files(
-                source_record,
-                repository_record,
-                lambda msg: callback(
-                    source_record,
-                    record_cnt,
-                    approximate_records_count,
-                    msg,
-                ),
+                source_record, repository_record, local_callback
             )
 
     def _create_update_record_metadata(
