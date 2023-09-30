@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Callable
 
-from oarepo_upload_cli.base.repository_client import RepositoryClient
+from oarepo_upload_cli.base.repository import RepositoryClient
 from oarepo_upload_cli.base.source import RecordSource, SourceRecord
 from oarepo_upload_cli.config import Config
 

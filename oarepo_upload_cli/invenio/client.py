@@ -2,7 +2,7 @@ from json import JSONDecodeError
 
 import requests
 
-from oarepo_upload_cli.base.repository_client import (
+from oarepo_upload_cli.base.repository import (
     RepositoryClient,
     RepositoryRecord,
 )
@@ -23,7 +23,7 @@ from oarepo_upload_cli.invenio.record import InvenioRepositoryRecord
 class InvenioRepositoryClient(RepositoryClient):
     def __init__(self, config):
         super().__init__(config)
-        self.connection = InvenioConnection(config)
+        self.connection = InvenioConnection(config.auth)
 
     @abstractmethod
     def get_id_query(self, source_record_id: str) -> Dict[str, str]:
@@ -52,7 +52,7 @@ class InvenioRepositoryClient(RepositoryClient):
 
     def create_record(self, record: SourceRecord) -> RepositoryRecord:
         res = self.connection.post(
-            url=self._config.collection_url, json=record.metadata.metadata
+            url=self._config.collection_url, json=record.metadata
         )
         return InvenioRepositoryRecord(
             self.connection,

@@ -1,8 +1,12 @@
 from abc import ABC, abstractmethod, abstractproperty
+from enum import Enum
 from typing import Dict, Optional
 
-from oarepo_upload_cli.base.record_file import RecordFile
-from oarepo_upload_cli.base.source import SourceRecord, RecordMetadata
+from oarepo_upload_cli.types import JsonType
+from oarepo_upload_cli.base.source import (
+    SourceRecord,
+    SourceRecordFile,
+)
 from oarepo_upload_cli.config import Config
 
 
@@ -31,29 +35,29 @@ class RepositoryRecord(ABC):
 
     @property
     @abstractmethod
-    def files(self):
-        return []
+    def files(self) -> Dict[str, RepositoryFile]:
+        return {}
 
     @abstractmethod
-    def create_update_file(self, file: RecordFile):
+    def create_update_file(self, file: SourceRecordFile):
         pass
 
     @abstractmethod
-    def create_file(self, file: RecordFile):
+    def create_file(self, file: SourceRecordFile):
         pass
 
     @abstractmethod
-    def update_file(self, file: RecordFile):
+    def update_file(self, file: SourceRecordFile):
         pass
 
     @abstractmethod
-    def delete_file(self, file: RecordFile):
+    def delete_file(self, file: SourceRecordFile):
         """
         Tries to delete a given file of a given record by its key.
         """
 
     @abstractmethod
-    def update_metadata(self, new_metadata: RecordMetadata):
+    def update_metadata(self, new_metadata: Dict[str, JsonType]):
         """
         Perform actualization of a given records metadata.
         """
@@ -90,3 +94,12 @@ class RepositoryClient(ABC):
         """
         Tries to delete a given record.
         """
+
+
+class FileStatus(str, Enum):
+    """
+    Based on: https://github.com/inveniosoftware/invenio-records-resources/blob/5335294dade21decea0f527022d96e12e1ffad52/invenio_records_resources/services/files/schema.py#L115
+    """
+
+    COMPLETED = "completed"
+    PENDING = "pending"

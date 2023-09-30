@@ -1,29 +1,11 @@
 from abc import ABC, abstractmethod
-from typing import List
-
-from .record_file import RecordFile
+from typing import List, Union, Dict
 
 from datetime import datetime
 from typing import Iterable
 
 from oarepo_upload_cli.config import Config
-
-
-class RecordMetadata(ABC):
-    def __init__(self):
-        pass
-
-    @property
-    @abstractmethod
-    def datetime_modified(self):
-        """
-        Returns the date of the last modification.
-        """
-
-    @property
-    @abstractmethod
-    def metadata(self):
-        pass
+from ..types import JsonType
 
 
 class SourceRecord(ABC):
@@ -42,14 +24,14 @@ class SourceRecord(ABC):
 
     @property
     @abstractmethod
-    def metadata(self) -> RecordMetadata:
+    def metadata(self) -> JsonType:
         """
         Returns a metadata serializable to JSON acceptable by a repository.
         """
 
     @property
     @abstractmethod
-    def files(self) -> List[RecordFile]:
+    def files(self) -> List["SourceRecordFile"]:
         pass
 
     @property
@@ -71,6 +53,38 @@ class SourceRecord(ABC):
     @property
     def datetime_modified(self):
         return self._updated
+
+
+class SourceRecordFile(ABC):
+    """
+    Represent a records file.
+    """
+
+    def __init__(self, key):
+        self._key = key
+
+    @property
+    @abstractmethod
+    def content_type(self):
+        pass
+
+    @property
+    def key(self):
+        return self._key
+
+    @property
+    @abstractmethod
+    def datetime_modified(self) -> datetime:
+        pass
+
+    @property
+    @abstractmethod
+    def metadata(self) -> JsonType:
+        pass
+
+    @abstractmethod
+    def get_reader(self):
+        pass
 
 
 class RecordSource(ABC):

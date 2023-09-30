@@ -3,9 +3,12 @@ import datetime
 import json
 from typing import Dict, Optional
 
-from oarepo_upload_cli.base.record_file import RecordFile
-from oarepo_upload_cli.base.repository_client import RepositoryClient, RepositoryRecord
-from oarepo_upload_cli.base.source import SourceRecord, RecordMetadata
+from oarepo_upload_cli.types import JsonType
+from oarepo_upload_cli.base.repository import RepositoryClient, RepositoryRecord
+from oarepo_upload_cli.base.source import (
+    SourceRecord,
+    SourceRecordFile,
+)
 
 
 class DryRepositoryRecord(RepositoryRecord):
@@ -14,7 +17,7 @@ class DryRepositoryRecord(RepositoryRecord):
 
     @property
     def datetime_modified(self):
-        return self.record.metadata.datetime_modified
+        return self.record.datetime_modified
 
     @property
     def record_id(self):
@@ -24,20 +27,20 @@ class DryRepositoryRecord(RepositoryRecord):
     def files(self):
         return []
 
-    def create_update_file(self, file: RecordFile):
+    def create_update_file(self, file: SourceRecordFile):
         print(f"Creating or updating file {file.key} of record {self.record_id}")
 
-    def create_file(self, file: RecordFile):
+    def create_file(self, file: SourceRecordFile):
         print(f"Creating file {file.key} of record {self.record_id}")
 
-    def update_file(self, file: RecordFile):
+    def update_file(self, file: SourceRecordFile):
         print(f"Updating file {file.key} of record {self.record_id}")
 
-    def delete_file(self, file: RecordFile):
+    def delete_file(self, file: SourceRecordFile):
         print(f"Deleting file {file.key} of record {self.record_id}")
 
-    def update_metadata(self, new_metadata: RecordMetadata):
-        print(f"Updating metadata of record {self.record_id}: {new_metadata.metadata}")
+    def update_metadata(self, new_metadata: Dict[str, JsonType]):
+        print(f"Updating metadata of record {self.record_id}: {new_metadata}")
 
 
 class DryRepositoryClient(RepositoryClient):
@@ -54,7 +57,7 @@ class DryRepositoryClient(RepositoryClient):
         print(
             f"\nCreating {source_record.id} {json.dumps(source_record.metadata, ensure_ascii=False, indent=4)}"
         )
-        return DryRepositoryRecord(source_record.metadata)
+        return DryRepositoryRecord(source_record)
 
     def delete_record(self, record: RepositoryRecord):
         print(f"\nDeleting {record.record_id}")

@@ -5,7 +5,7 @@ import pytest
 import requests
 from test_record import TestRecord
 
-from oarepo_upload_cli.base.repository_client import (
+from oarepo_upload_cli.base.repository import (
     AbstractRepositoryRecordsHandler,
 )
 

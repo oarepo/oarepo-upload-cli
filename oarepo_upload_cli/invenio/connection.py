@@ -7,8 +7,8 @@ from oarepo_upload_cli.exceptions import (
 
 
 class InvenioConnection:
-    def __init__(self, config):
-        self._config = config
+    def __init__(self, auth):
+        self._auth = auth
         self._json_headers = {"Content-Type": "application/json"}
 
     def get(self, url, *, params=None):
@@ -28,7 +28,7 @@ class InvenioConnection:
             request_method = getattr(globals()["requests"], http_verb)
             headers = kwargs.pop("headers", self._json_headers)
             res = request_method(
-                verify=False, auth=self._config.auth, headers=headers, **kwargs
+                verify=False, auth=self._auth, headers=headers, **kwargs
             )
             res.raise_for_status()
         except requests.ConnectionError as conn_err:
