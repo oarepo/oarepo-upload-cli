@@ -1,5 +1,5 @@
-from typing import Dict, List, Union
 from datetime import datetime
+from typing import Dict, List, Union
 
 JsonType = Union[None, int, str, bool, List["JsonType"], Dict[str, "JsonType"]]
 
@@ -13,3 +13,7 @@ def dict_get(d, path):
 
 def parse_modified(metadata, modified_field_name):
     return datetime.fromisoformat(dict_get(metadata, modified_field_name))
+
+
+def noop(*args, **kwargs):
+    pass

@@ -1,10 +1,10 @@
 from abc import abstractmethod
 from typing import Any, Dict, Optional, Union
 
-from oarepo_upload_cli.repository import RepositoryClient, RepositoryRecord
-from oarepo_upload_cli.source import SourceRecord
 from oarepo_upload_cli.invenio.connection import InvenioConnection
 from oarepo_upload_cli.invenio.record import InvenioRepositoryRecord
+from oarepo_upload_cli.repository import RepositoryClient, RepositoryRecord
+from oarepo_upload_cli.source import SourceRecord
 from oarepo_upload_cli.utils import parse_modified
 
 

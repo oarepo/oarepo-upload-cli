@@ -1,10 +1,9 @@
 import dataclasses
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Iterable, List, Callable, BinaryIO
+from typing import BinaryIO, Callable, Iterable, List
 
 from oarepo_upload_cli.config import Config
-
 from oarepo_upload_cli.utils import JsonType
 
 

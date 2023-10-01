@@ -3,10 +3,10 @@ from functools import cached_property
 from typing import Dict
 from urllib.parse import urljoin
 
-from oarepo_upload_cli.repository import RepositoryFile, RepositoryRecord
-from oarepo_upload_cli.source import SourceRecordFile
 from oarepo_upload_cli.config import Config
 from oarepo_upload_cli.invenio.connection import InvenioConnection
+from oarepo_upload_cli.repository import FileStatus, RepositoryFile, RepositoryRecord
+from oarepo_upload_cli.source import SourceRecordFile
 from oarepo_upload_cli.utils import JsonType, parse_modified
 
 
@@ -54,7 +54,8 @@ class InvenioRepositoryRecord(RepositoryRecord):
         if file.key in self.files:
             existing_file = self.files[file.key]
             if (
-                existing_file.datetime_modified
+                existing_file.file_status == FileStatus.COMPLETED
+                and existing_file.datetime_modified
                 and existing_file.datetime_modified >= file.datetime_modified
             ):
                 # no need to update

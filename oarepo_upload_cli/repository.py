@@ -1,11 +1,11 @@
 import dataclasses
 from abc import ABC, abstractmethod
+from datetime import datetime
 from enum import Enum
 from typing import Dict, Optional
-from datetime import datetime
 
-from oarepo_upload_cli.source import SourceRecord, SourceRecordFile
 from oarepo_upload_cli.config import Config
+from oarepo_upload_cli.source import SourceRecord, SourceRecordFile
 from oarepo_upload_cli.utils import JsonType
 
 
