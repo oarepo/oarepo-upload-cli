@@ -1,11 +1,11 @@
 import dataclasses
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Iterable, List
+from typing import Iterable, List, Callable, BinaryIO
 
 from oarepo_upload_cli.config import Config
 
-from ..types import JsonType
+from oarepo_upload_cli.utils import JsonType
 
 
 class RecordSource(ABC):
@@ -18,7 +18,7 @@ class RecordSource(ABC):
 
     @abstractmethod
     def get_records(
-        self, modified_after: datetime = None, modified_before: datetime = None
+        self, modified_after: datetime, modified_before: datetime
     ) -> Iterable["SourceRecord"]:
         """
         Provides a generator that returns records within given timestamps.
@@ -28,7 +28,7 @@ class RecordSource(ABC):
 
     @abstractmethod
     def get_records_count(
-        self, modified_after: datetime = None, modified_before: datetime = None
+        self, modified_after: datetime, modified_before: datetime
     ) -> int:
         """
         Approximates the size of a collection of records being returned.
@@ -50,7 +50,7 @@ class SourceRecord:
 
 
 @dataclasses.dataclass
-class SourceRecordFile(ABC):
+class SourceRecordFile:
     """
     Represent a source record file.
     """
@@ -59,7 +59,5 @@ class SourceRecordFile(ABC):
     content_type: str
     datetime_modified: datetime
     metadata: JsonType
-
-    @abstractmethod
-    def get_reader(self):
-        pass
+    reader: Callable[[], BinaryIO]
+    """Factory method for a reader"""

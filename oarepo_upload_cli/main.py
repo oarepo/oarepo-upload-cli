@@ -4,7 +4,7 @@ import arrow
 import click
 from tqdm import tqdm
 
-from oarepo_upload_cli.base.source import SourceRecord
+from oarepo_upload_cli.source import SourceRecord
 from oarepo_upload_cli.config import Config
 from oarepo_upload_cli.dry_run import DryRepositoryClient
 from oarepo_upload_cli.entry_points_loader import EntryPointsLoader

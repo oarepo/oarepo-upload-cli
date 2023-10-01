@@ -1,8 +1,8 @@
 from datetime import datetime
 from typing import Callable, Optional
 
-from oarepo_upload_cli.base.repository import RepositoryClient, RepositoryRecord
-from oarepo_upload_cli.base.source import RecordSource, SourceRecord
+from oarepo_upload_cli.repository import RepositoryClient, RepositoryRecord
+from oarepo_upload_cli.source import RecordSource, SourceRecord
 from oarepo_upload_cli.config import Config
 
 

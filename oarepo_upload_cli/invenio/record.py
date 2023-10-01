@@ -1,49 +1,39 @@
 import dataclasses
-from datetime import datetime
 from functools import cached_property
 from typing import Dict
 from urllib.parse import urljoin
 
-from oarepo_upload_cli.base.repository import RepositoryFile, RepositoryRecord
-from oarepo_upload_cli.base.source import SourceRecordFile
+from oarepo_upload_cli.repository import RepositoryFile, RepositoryRecord
+from oarepo_upload_cli.source import SourceRecordFile
+from oarepo_upload_cli.config import Config
 from oarepo_upload_cli.invenio.connection import InvenioConnection
-from oarepo_upload_cli.types import JsonType
-
-
-@dataclasses.dataclass
-class InvenioRepositoryFile(RepositoryFile):
-    metadata: Dict[str, JsonType]
-    file_modified_field_name: str
-
-    @property
-    def datetime_modified(self):
-        if self.file_modified_field_name in (self.metadata.get("metadata") or {}):
-            return datetime.fromisoformat(
-                self.metadata["metadata"][self.file_modified_field_name]
-            )
+from oarepo_upload_cli.utils import JsonType, parse_modified
 
 
 @dataclasses.dataclass
 class InvenioRepositoryRecord(RepositoryRecord):
+    config: Config
     connection: InvenioConnection
-    base_url: str
     metadata: Dict[str, JsonType]
-    record_modified_field_name: str
-    file_modified_field_name: str
 
     @cached_property
-    def files(self) -> Dict[str, InvenioRepositoryFile]:
+    def files(self) -> Dict[str, RepositoryFile]:
         return {
-            x["key"]: InvenioRepositoryFile(x["key"], x, self.file_modified_field_name)
-            for x in self.connection.get(self.link_url("files")).json()["entries"]
+            file_metadata["key"]: RepositoryFile(
+                key=file_metadata["key"],
+                datetime_modified=parse_modified(
+                    file_metadata, self.config.file_modified_field_name
+                ),
+                file_status=file_metadata["status"],
+                metadata=file_metadata,
+            )
+            for file_metadata in self.connection.get(self.link_url("files")).json()[
+                "entries"
+            ]
         }
 
-    @property
-    def record_id(self):
-        return self.metadata["id"]
-
     def link_url(self, key):
-        base_url = self.base_url
+        base_url = self.config.collection_url
         if not base_url.endswith("/"):
             base_url += "/"
         return urljoin(base_url, self.metadata["links"][key])
@@ -55,12 +45,6 @@ class InvenioRepositoryRecord(RepositoryRecord):
     @property
     def files_url(self):
         return self.link_url("files")
-
-    @property
-    def datetime_modified(self):
-        return datetime.fromisoformat(
-            self.metadata["metadata"][self.record_modified_field_name]
-        )
 
     def update_metadata(self, new_metadata: Dict[str, JsonType]):
         self.metadata = self.connection.put(url=self.self_url, json=new_metadata).json()
@@ -99,17 +83,21 @@ class InvenioRepositoryRecord(RepositoryRecord):
         self.connection.put(
             url=content_url,
             headers={"Content-Type": file.content_type},
-            data=file.get_reader(),
+            data=file.reader(),
         )
 
         # commit
         self.connection.post(commit_url)
 
         # reread the metadata to make sure they have been uploaded
-        repository_file = InvenioRepositoryFile(
+        fetched_metadata = self.connection.get(url).json()
+        repository_file = RepositoryFile(
             key=file.key,
-            metadata=self.connection.get(url),
-            file_modified_field_name=self.file_modified_field_name,
+            metadata=fetched_metadata,
+            datetime_modified=parse_modified(
+                fetched_metadata, self.config.file_modified_field_name
+            ),
+            file_status=fetched_metadata["status"],
         )
         self.files[file.key] = repository_file
 

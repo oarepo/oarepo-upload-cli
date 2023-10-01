@@ -1,17 +1,11 @@
 from abc import abstractmethod
-from json import JSONDecodeError
 from typing import Any, Dict, Optional, Union
 
-import requests
-
-from oarepo_upload_cli.base.repository import RepositoryClient, RepositoryRecord
-from oarepo_upload_cli.base.source import SourceRecord
-from oarepo_upload_cli.exceptions import (
-    ExceptionMessage,
-    RepositoryCommunicationException,
-)
+from oarepo_upload_cli.repository import RepositoryClient, RepositoryRecord
+from oarepo_upload_cli.source import SourceRecord
 from oarepo_upload_cli.invenio.connection import InvenioConnection
 from oarepo_upload_cli.invenio.record import InvenioRepositoryRecord
+from oarepo_upload_cli.utils import parse_modified
 
 
 class InvenioRepositoryClient(RepositoryClient):
@@ -38,24 +32,27 @@ class InvenioRepositoryClient(RepositoryClient):
         hits = res_payload["hits"]["hits"]
 
         if hits:
-            return self.record_class(
-                self.connection,
-                self._config.collection_url,
-                hits[0],
-                self._config.record_modified_field_name,
-                self._config.file_modified_field_name,
-            )
+            if len(hits) > 1:
+                raise AttributeError(
+                    f"Repository returned more than one record for id {record.record_id} with query {params}"
+                )
+            return self._parse_record(hits[0])
 
     def create_record(self, record: SourceRecord) -> RepositoryRecord:
         res = self.connection.post(
             url=self._config.collection_url, json=record.metadata
-        )
+        ).json()
+        return self._parse_record(res)
+
+    def _parse_record(self, res):
         return self.record_class(
-            self.connection,
-            self._config.collection_url,
-            res.json(),
-            self._config.record_modified_field_name,
-            self._config.file_modified_field_name,
+            record_id=res["id"],
+            datetime_modified=parse_modified(
+                res, self._config.record_modified_field_name
+            ),
+            config=self._config,
+            connection=self.connection,
+            metadata=res,
         )
 
     def delete_record(self, record: RepositoryRecord):
@@ -69,26 +66,7 @@ class InvenioRepositoryClient(RepositoryClient):
         Returns the data or prints an error with the description what happened.
         """
 
-        try:
-            url = self._config.collection_url
-            res = self.connection.get(url)
-        except requests.ConnectionError as conn_err:
-            raise RepositoryCommunicationException(
-                ExceptionMessage.ConnectionError, conn_err
-            ) from conn_err
-        except requests.exceptions.HTTPError as http_err:
-            raise RepositoryCommunicationException(
-                ExceptionMessage.HTTPError, http_err, res.text, url=url
-            ) from http_err
-        except Exception as err:
-            raise RepositoryCommunicationException(str(err), err) from err
-
-        try:
-            content = res.json()
-        except JSONDecodeError as serialization_err:
-            raise RepositoryCommunicationException(
-                ExceptionMessage.JSONContentNotSerializable, serialization_err
-            ) from serialization_err
+        content = self.connection.get(self._config.collection_url).json()
 
         content_element = content
         for path_element in ["aggregations"] + list(path):

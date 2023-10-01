@@ -2,12 +2,15 @@ from datetime import datetime
 from io import BytesIO
 from typing import Iterable
 
-from oarepo_upload_cli.base.source import RecordSource, SourceRecord, SourceRecordFile
+from oarepo_upload_cli.source import RecordSource, SourceRecord, SourceRecordFile
 
 
-class TestFile(SourceRecordFile):
-    def get_reader(self):
-        return BytesIO(self.key.encode("utf-8"))
+def sample_reader():
+    return BytesIO("sample.txt".encode("utf-8"))
+
+
+def new_reader():
+    return BytesIO("new.txt".encode("utf-8"))
 
 
 class TestSource(RecordSource):
@@ -24,7 +27,7 @@ class TestSource(RecordSource):
                         "dateModified": datetime(year=2023, month=1, day=1).isoformat(),
                     }
                 },
-                files={},
+                files=[],
             ),
         ],
         datetime(year=2023, month=2, day=1): [
@@ -39,7 +42,7 @@ class TestSource(RecordSource):
                         "dateModified": datetime(year=2023, month=1, day=1).isoformat(),
                     }
                 },
-                files={},
+                files=[],
             )
         ],
         datetime(year=2023, month=3, day=1): [
@@ -54,7 +57,7 @@ class TestSource(RecordSource):
                         "dateModified": datetime(year=2023, month=3, day=1).isoformat(),
                     }
                 },
-                files={},
+                files=[],
             )
         ],
         datetime(year=2023, month=4, day=1): [
@@ -70,7 +73,7 @@ class TestSource(RecordSource):
                     }
                 },
                 files=[
-                    TestFile(
+                    SourceRecordFile(
                         key="sample.txt",
                         content_type="application/octet-stream",
                         datetime_modified=datetime(year=2023, month=4, day=1),
@@ -79,6 +82,7 @@ class TestSource(RecordSource):
                                 year=2023, month=4, day=1
                             ).isoformat()
                         },
+                        reader=sample_reader,
                     )
                 ],
             )
@@ -96,7 +100,7 @@ class TestSource(RecordSource):
                     }
                 },
                 files=[
-                    TestFile(
+                    SourceRecordFile(
                         key="sample.txt",
                         content_type="application/octet-stream",
                         datetime_modified=datetime(year=2023, month=4, day=1),
@@ -105,6 +109,7 @@ class TestSource(RecordSource):
                                 year=2023, month=4, day=1
                             ).isoformat()
                         },
+                        reader=sample_reader,
                     )
                 ],
             )
@@ -122,7 +127,7 @@ class TestSource(RecordSource):
                     }
                 },
                 files=[
-                    TestFile(
+                    SourceRecordFile(
                         key="sample.txt",
                         content_type="application/octet-stream",
                         datetime_modified=datetime(year=2023, month=4, day=1),
@@ -131,8 +136,9 @@ class TestSource(RecordSource):
                                 year=2023, month=4, day=1
                             ).isoformat()
                         },
+                        reader=sample_reader,
                     ),
-                    TestFile(
+                    SourceRecordFile(
                         key="new.txt",
                         content_type="application/octet-stream",
                         datetime_modified=datetime(year=2023, month=6, day=1),
@@ -141,6 +147,7 @@ class TestSource(RecordSource):
                                 year=2023, month=6, day=1
                             ).isoformat()
                         },
+                        reader=new_reader,
                     ),
                 ],
             )
@@ -158,7 +165,7 @@ class TestSource(RecordSource):
                     }
                 },
                 files=[
-                    TestFile(
+                    SourceRecordFile(
                         key="new.txt",
                         content_type="application/octet-stream",
                         datetime_modified=datetime(year=2023, month=6, day=1),
@@ -167,6 +174,7 @@ class TestSource(RecordSource):
                                 year=2023, month=6, day=1
                             ).isoformat()
                         },
+                        reader=new_reader,
                     ),
                 ],
             )
@@ -184,7 +192,7 @@ class TestSource(RecordSource):
                     }
                 },
                 files=[
-                    TestFile(
+                    SourceRecordFile(
                         key="new.txt",
                         content_type="application/octet-stream",
                         datetime_modified=datetime(year=2023, month=6, day=1),
@@ -193,6 +201,7 @@ class TestSource(RecordSource):
                                 year=2023, month=6, day=1
                             ).isoformat()
                         },
+                        reader=new_reader,
                     ),
                 ],
             )

@@ -39,7 +39,7 @@ class Config:
         return (
             self.config["repository"].get("file_modified_field")
             or os.getenv("REPOSITORY_UPLOADER_FILE_MODIFIED_FIELD_NAME")
-            or "dateModified"
+            or "metadata.dateModified"
         )
 
     @property
@@ -47,7 +47,7 @@ class Config:
         return (
             self.config["repository"].get("record_modified_field")
             or os.getenv("REPOSITORY_UPLOADER_RECORD_MODIFIED_FIELD_NAME")
-            or "dateModified"
+            or "metadata.dateModified"
         )
 
     @property
@@ -58,8 +58,10 @@ class Config:
 
     @property
     def repository_name(self):
-        return self.ensure_defined(
-            "entrypoints", "repository", "REPOSITORY_UPLOADER_REPOSITORY"
+        return (
+            self.config["entrypoints"].get("repository")
+            or os.getenv("REPOSITORY_UPLOADER_REPOSITORY")
+            or "invenio"
         )
 
     def override(self, section, option, value):

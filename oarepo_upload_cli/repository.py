@@ -2,27 +2,25 @@ import dataclasses
 from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Dict, Optional
+from datetime import datetime
 
-from oarepo_upload_cli.base.source import SourceRecord, SourceRecordFile
+from oarepo_upload_cli.source import SourceRecord, SourceRecordFile
 from oarepo_upload_cli.config import Config
-from oarepo_upload_cli.types import JsonType
+from oarepo_upload_cli.utils import JsonType
 
 
 @dataclasses.dataclass
 class RepositoryFile:
     key: str
+    datetime_modified: datetime
+    file_status: "FileStatus"
+    metadata: Dict[str, JsonType]
 
 
+@dataclasses.dataclass
 class RepositoryRecord(ABC):
-    @property
-    @abstractmethod
-    def datetime_modified(self):
-        pass
-
-    @property
-    @abstractmethod
-    def record_id(self):
-        pass
+    record_id: str
+    datetime_modified: datetime
 
     @property
     @abstractmethod
