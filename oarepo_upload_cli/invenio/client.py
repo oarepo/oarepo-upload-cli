@@ -1,4 +1,3 @@
-from abc import abstractmethod
 from typing import Any, Dict, Optional, Union
 
 from oarepo_upload_cli.invenio.connection import InvenioConnection
@@ -15,18 +14,22 @@ class InvenioRepositoryClient(RepositoryClient):
         super().__init__(config)
         self.connection = InvenioConnection(config.auth)
 
-    @abstractmethod
-    def get_id_query(self, source_record_id: str) -> Dict[str, str]:
-        raise NotImplementedError("ID query not implemented")
+    def get_id_query(self, record_id) -> Dict[str, str]:
+        return {
+            "q": f"{self.config.repository_id_query_field}:{record_id}",
+        }
 
-    @abstractmethod
     def get_last_modification_date(self) -> Optional[str]:
-        raise NotImplementedError("Last modification date not implemented")
+        if self.config.repository_last_modification_date_agg:
+            agg = self.config.repository_last_modification_date_agg.split(".")
+            return self._get_aggregation(*agg)
+        else:
+            return None
 
     def get_record(self, record: SourceRecord) -> RepositoryRecord:
         params = self.get_id_query(record.record_id)
 
-        res = self.connection.get(url=self._config.collection_url, params=params)
+        res = self.connection.get(url=self.config.collection_url, params=params)
 
         res_payload = res.json()
         hits = res_payload["hits"]["hits"]
@@ -40,7 +43,7 @@ class InvenioRepositoryClient(RepositoryClient):
 
     def create_record(self, record: SourceRecord) -> RepositoryRecord:
         res = self.connection.post(
-            url=self._config.collection_url, json=record.metadata
+            url=self.config.collection_url, json=record.metadata
         ).json()
         return self._parse_record(res)
 
@@ -48,9 +51,9 @@ class InvenioRepositoryClient(RepositoryClient):
         return self.record_class(
             record_id=res["id"],
             datetime_modified=parse_modified(
-                res, self._config.record_modified_field_name
+                res, self.config.record_modified_field_name
             ),
-            config=self._config,
+            config=self.config,
             connection=self.connection,
             metadata=res,
         )
@@ -66,7 +69,7 @@ class InvenioRepositoryClient(RepositoryClient):
         Returns the data or prints an error with the description what happened.
         """
 
-        content = self.connection.get(self._config.collection_url).json()
+        content = self.connection.get(self.config.collection_url).json()
 
         content_element = content
         for path_element in ["aggregations"] + list(path):

@@ -35,6 +35,15 @@ In order for the configuration file to be parsed correctly, create the file foll
   record_modified_field = metadata.dateModified
   file_modified_field = metadata.dateModified
 
+  # field inside the record that holds the id from the source  
+  id_query_field = metadata.originalId
+  
+  # to be able to upload only non-modified records, provide a max(..) aggregation
+  # inside the repository and set the path within the aggs element here
+  last_modification_date_agg = dateModifiedAgg.value
+
+  
+  
   [entrypoints]
   # name of the entrypoint inside oarepo_upload_cli.dependencies 
   # that gives implementation of RecordSource
@@ -55,6 +64,8 @@ REPOSITORY_UPLOADER_BEARER_TOKEN
 REPOSITORY_UPLOADER_COLLECTION_URL
 REPOSITORY_UPLOADER_FILE_MODIFIED_FIELD_NAME
 REPOSITORY_UPLOADER_RECORD_MODIFIED_FIELD_NAME
+REPOSITORY_UPLOADER_ID_QUERY_FIELD
+REPOSITORY_UPLOADER_LAST_MODIFICATION_DATE_AGG
 
 REPOSITORY_UPLOADER_SOURCE
 REPOSITORY_UPLOADER_REPOSITORY

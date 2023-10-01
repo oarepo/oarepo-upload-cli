@@ -86,7 +86,13 @@ class Uploader:
     def _create_update_record_files(source_record, repository_record, callback):
         processed_keys = set()
         for f in source_record.files:
-            if repository_record.create_update_file(f):
+            existing = repository_record.files.get(f.key)
+            if existing:
+                if existing.needs_updating(f):
+                    repository_record.update_file(f)
+                    callback(f"{f.key} uploaded")
+            else:
+                repository_record.create_file(f)
                 callback(f"{f.key} uploaded")
             processed_keys.add(f.key)
 

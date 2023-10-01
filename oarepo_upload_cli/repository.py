@@ -16,6 +16,13 @@ class RepositoryFile:
     file_status: "FileStatus"
     metadata: Dict[str, JsonType]
 
+    def needs_updating(self, source: SourceRecordFile):
+        return not (
+            self.file_status == FileStatus.COMPLETED
+            and self.datetime_modified
+            and self.datetime_modified >= source.datetime_modified
+        )
+
 
 @dataclasses.dataclass
 class RepositoryRecord(ABC):
@@ -26,10 +33,6 @@ class RepositoryRecord(ABC):
     @abstractmethod
     def files(self) -> Dict[str, RepositoryFile]:
         return {}
-
-    @abstractmethod
-    def create_update_file(self, file: SourceRecordFile) -> bool:
-        pass
 
     @abstractmethod
     def create_file(self, file: SourceRecordFile):
@@ -54,7 +57,7 @@ class RepositoryRecord(ABC):
 
 class RepositoryClient(ABC):
     def __init__(self, config: Config):
-        self._config = config
+        self.config = config
 
     @abstractmethod
     def get_id_query(self, source_record_id: str) -> Dict[str, str]:

@@ -5,7 +5,7 @@ from urllib.parse import urljoin
 
 from oarepo_upload_cli.config import Config
 from oarepo_upload_cli.invenio.connection import InvenioConnection
-from oarepo_upload_cli.repository import FileStatus, RepositoryFile, RepositoryRecord
+from oarepo_upload_cli.repository import RepositoryFile, RepositoryRecord
 from oarepo_upload_cli.source import SourceRecordFile
 from oarepo_upload_cli.utils import JsonType, parse_modified
 
@@ -49,30 +49,9 @@ class InvenioRepositoryRecord(RepositoryRecord):
     def update_metadata(self, new_metadata: Dict[str, JsonType]):
         self.metadata = self.connection.put(url=self.self_url, json=new_metadata).json()
 
-    def create_update_file(self, file: SourceRecordFile) -> bool:
-        existing_file: RepositoryFile
-        if file.key in self.files:
-            existing_file = self.files[file.key]
-            if (
-                existing_file.file_status == FileStatus.COMPLETED
-                and existing_file.datetime_modified
-                and existing_file.datetime_modified >= file.datetime_modified
-            ):
-                # no need to update
-                return False
-
-            # invenio can not perform update, so at first delete and then create
-            self.delete_file(file)
-
-        self.create_file(file)
-        return True
-
-    def create_file(self, file: SourceRecordFile):
+    def create_file(self, file: SourceRecordFile) -> RepositoryFile:
         # raises exception on error
         self.connection.post(url=self.files_url, json=[{"key": file.key}])
-        self.update_file(file)
-
-    def update_file(self, file: SourceRecordFile):
         url = f"{self.files_url}/{file.key}"
         content_url = f"{self.files_url}/{file.key}/content"
         commit_url = f"{self.files_url}/{file.key}/commit"
@@ -101,6 +80,12 @@ class InvenioRepositoryRecord(RepositoryRecord):
             file_status=fetched_metadata["status"],
         )
         self.files[file.key] = repository_file
+        return repository_file
+
+    def update_file(self, file: SourceRecordFile) -> RepositoryFile:
+        # invenio can not do file update, so delete and create again
+        self.delete_file(file)
+        return self.create_file(file)
 
     def delete_file(self, file: SourceRecordFile):
         url = f"{self.files_url}/{file.key}"

@@ -6,8 +6,8 @@ import pytest
 import requests
 
 from oarepo_upload_cli.config import Config
+from oarepo_upload_cli.invenio.client import InvenioRepositoryClient
 from oarepo_upload_cli.uploader import Uploader
-from tests.repository import TestRepositoryClient
 from tests.source import TestSource
 
 collection_url = "https://localhost:5000/api/simple/"
@@ -96,7 +96,7 @@ def test_upload(clear_repository, entry_points):
         ("authentication", "token", Path(".token").read_text().strip()),
     )
     source = TestSource(config)
-    repository = TestRepositoryClient(config)
+    repository = InvenioRepositoryClient(config)
 
     uploader = Uploader(config, source, repository)
 

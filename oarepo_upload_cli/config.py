@@ -64,6 +64,20 @@ class Config:
             or "invenio"
         )
 
+    @property
+    def repository_id_query_field(self):
+        return (
+            self.config["repository"].get("id_query_field")
+            or os.getenv("REPOSITORY_UPLOADER_ID_QUERY_FIELD")
+            or "metadata.originalId"
+        )
+
+    @property
+    def repository_last_modification_date_agg(self):
+        return self.config["repository"].get("last_modification_date_agg") or os.getenv(
+            "REPOSITORY_UPLOADER_LAST_MODIFICATION_DATE_AGG"
+        )
+
     def override(self, section, option, value):
         if value:
             self.config[section][option] = value
