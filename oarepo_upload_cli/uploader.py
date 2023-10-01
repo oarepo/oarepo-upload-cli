@@ -49,6 +49,8 @@ class Uploader:
                     msg,
                 )
 
+            local_callback("checking")
+
             repository_record = self._create_update_record_metadata(
                 source_record,
                 local_callback,

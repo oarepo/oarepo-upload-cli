@@ -105,6 +105,7 @@ def test_upload(clear_repository, entry_points):
     # create the first version of the record
     uploader.upload(t(1, 1), t(1, 31), log)
     assert log.messages == [
+        "checking",
         "created",
     ]
 
@@ -122,7 +123,9 @@ def test_upload(clear_repository, entry_points):
     # nothing changed here
     log.reset()
     uploader.upload(t(1, 1), t(1, 31), log)
-    assert log.messages == []
+    assert log.messages == [
+        "checking",
+    ]
 
     assert get_records() == [
         {
@@ -138,7 +141,9 @@ def test_upload(clear_repository, entry_points):
     # next month, the record comes again, but still not changed in the timestamp
     log.reset()
     uploader.upload(t(2, 1), t(2, 28), log)
-    assert log.messages == []
+    assert log.messages == [
+        "checking",
+    ]
 
     assert get_records() == [
         {
@@ -154,7 +159,7 @@ def test_upload(clear_repository, entry_points):
     # next month, the metadata got updated
     log.reset()
     uploader.upload(t(3, 1), t(3, 31), log)
-    assert log.messages == ["updated"]
+    assert log.messages == ["checking", "updated"]
 
     assert get_records() == [
         {
@@ -169,7 +174,7 @@ def test_upload(clear_repository, entry_points):
 
     log.reset()
     uploader.upload(t(4, 1), t(4, 30), log)
-    assert log.messages == ["sample.txt uploaded"]
+    assert log.messages == ["checking", "sample.txt uploaded"]
 
     assert get_records() == [
         {
@@ -185,7 +190,7 @@ def test_upload(clear_repository, entry_points):
     # next month, the metadata got updated again, file stays the same
     log.reset()
     uploader.upload(t(5, 1), t(5, 31), log)
-    assert log.messages == ["updated"]
+    assert log.messages == ["checking", "updated"]
 
     assert get_records() == [
         {
@@ -201,7 +206,7 @@ def test_upload(clear_repository, entry_points):
     # then a new file is uploaded
     log.reset()
     uploader.upload(t(6, 1), t(6, 30), log)
-    assert log.messages == ["new.txt uploaded"]
+    assert log.messages == ["checking", "new.txt uploaded"]
 
     assert get_records() == [
         {
@@ -220,7 +225,7 @@ def test_upload(clear_repository, entry_points):
     # older file is removed
     log.reset()
     uploader.upload(t(7, 1), t(7, 31), log)
-    assert log.messages == ["sample.txt deleted"]
+    assert log.messages == ["checking", "sample.txt deleted"]
 
     assert get_records() == [
         {
@@ -238,6 +243,6 @@ def test_upload(clear_repository, entry_points):
     # record gets deleted
     log.reset()
     uploader.upload(t(8, 1), t(8, 31), log)
-    assert log.messages == ["deleted"]
+    assert log.messages == ["checking", "deleted"]
 
     assert get_records() == []

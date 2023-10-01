@@ -111,9 +111,9 @@ def main(
         if progress_bar.total != approximate_count:
             progress_bar.total = approximate_count
         progress_bar.set_description(
-            f"{source_record.id} {source_record.datetime_modified} {message}"
+            f"{source_record.record_id} {source_record.datetime_modified} {message}"
         )
-        progress_bar.update(cnt)
+        progress_bar.update(cnt - progress_bar.n)
 
     uploader = Uploader(config, source, repository)
     uploader.upload(modified_after, modified_before, callback)
