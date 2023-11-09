@@ -2,6 +2,8 @@
 
 set -e
 
+OAREPO_VERSION=${OAREPO_VERSION:-"11.0"}
+
 cd "$(dirname "$0")"
 
 initialize_venv() {
@@ -25,6 +27,7 @@ initialize_server_venv() {
   source .venv-server/bin/activate
 
   .venv-server/bin/pip install -U setuptools pip wheel
+  .venv-server/bin/pip install "oarepo>=$OAREPO_VERSION,<${OAREPO_VERSION%.*}.999"
   .venv-server/bin/pip install -e simple-server
 }
 
