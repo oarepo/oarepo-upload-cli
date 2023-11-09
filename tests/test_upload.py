@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 import requests
 
+from oarepo_upload_cli.audit import Audit, AuditLevel
 from oarepo_upload_cli.config import Config
 from oarepo_upload_cli.invenio.client import InvenioRepositoryClient
 from oarepo_upload_cli.uploader import Uploader
@@ -95,8 +96,9 @@ def test_upload(clear_repository, entry_points):
         ("repository", "collection_url", collection_url),
         ("authentication", "token", Path(".token").read_text().strip()),
     )
-    source = TestSource(config)
-    repository = InvenioRepositoryClient(config)
+    audit = Audit(AuditLevel.ERROR)
+    source = TestSource(config, audit)
+    repository = InvenioRepositoryClient(config, audit, dry_run=False)
 
     uploader = Uploader(config, source, repository)
 
