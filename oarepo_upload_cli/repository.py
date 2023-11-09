@@ -4,6 +4,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Dict, Optional
 
+from oarepo_upload_cli.audit import Audit
 from oarepo_upload_cli.config import Config
 from oarepo_upload_cli.source import SourceRecord, SourceRecordFile
 from oarepo_upload_cli.utils import JsonType
@@ -28,6 +29,7 @@ class RepositoryFile:
 class RepositoryRecord(ABC):
     record_id: str
     datetime_modified: datetime
+    audit: Audit
 
     @property
     @abstractmethod
@@ -56,8 +58,10 @@ class RepositoryRecord(ABC):
 
 
 class RepositoryClient(ABC):
-    def __init__(self, config: Config):
+    def __init__(self, config: Config, audit: Audit, dry_run):
         self.config = config
+        self.audit = audit
+        self.dry_run = dry_run
 
     @abstractmethod
     def get_id_query(self, source_record_id: str) -> Dict[str, str]:

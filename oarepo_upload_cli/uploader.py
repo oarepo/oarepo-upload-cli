@@ -85,7 +85,9 @@ class Uploader:
         return repository_record
 
     @staticmethod
-    def _create_update_record_files(source_record, repository_record, callback):
+    def _create_update_record_files(
+        source_record: SourceRecord, repository_record: RepositoryRecord, callback
+    ):
         processed_keys = set()
         for f in source_record.files:
             existing = repository_record.files.get(f.key)

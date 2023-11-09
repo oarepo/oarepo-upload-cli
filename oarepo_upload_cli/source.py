@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import BinaryIO, Callable, Iterable, List
 
+from oarepo_upload_cli.audit import Audit
 from oarepo_upload_cli.config import Config
 from oarepo_upload_cli.utils import JsonType
 
@@ -12,8 +13,9 @@ class RecordSource(ABC):
     Describes a source that is used to generate records.
     """
 
-    def __init__(self, config: Config) -> None:
+    def __init__(self, config: Config, audit: Audit) -> None:
         self._config = config
+        self._audit = audit
 
     @abstractmethod
     def get_records(

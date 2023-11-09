@@ -1,13 +1,15 @@
 import json
 from typing import Dict, Optional
 
+from oarepo_upload_cli.audit import Audit
 from oarepo_upload_cli.repository import RepositoryClient, RepositoryRecord
 from oarepo_upload_cli.source import SourceRecord, SourceRecordFile
 from oarepo_upload_cli.utils import JsonType
 
 
-class DryRepositoryRecord(RepositoryRecord):
-    def __init__(self, record: SourceRecord):
+class NullRepositoryRecord(RepositoryRecord):
+    def __init__(self, record: SourceRecord, audit: Audit):
+        self.audit = audit
         self.record = record
 
     @property
@@ -20,22 +22,22 @@ class DryRepositoryRecord(RepositoryRecord):
 
     @property
     def files(self):
-        return []
+        return {}
 
     def create_file(self, file: SourceRecordFile):
-        print(f"Creating file {file.key} of record {self.record_id}")
+        self.audit.info(f"Creating file {file.key} of record {self.record_id}")
 
     def update_file(self, file: SourceRecordFile):
-        print(f"Updating file {file.key} of record {self.record_id}")
+        self.audit.info(f"Updating file {file.key} of record {self.record_id}")
 
     def delete_file(self, file: SourceRecordFile):
-        print(f"Deleting file {file.key} of record {self.record_id}")
+        self.audit.info(f"Deleting file {file.key} of record {self.record_id}")
 
     def update_metadata(self, new_metadata: Dict[str, JsonType]):
-        print(f"Updating metadata of record {self.record_id}: {new_metadata}")
+        self.audit.info(f"Updating metadata of record {self.record_id}: {new_metadata}")
 
 
-class DryRepositoryClient(RepositoryClient):
+class NullRepositoryClient(RepositoryClient):
     def get_id_query(self, source_record_id: str) -> Dict[str, str]:
         return {}
 
@@ -46,10 +48,10 @@ class DryRepositoryClient(RepositoryClient):
         return None
 
     def create_record(self, source_record: SourceRecord) -> RepositoryRecord:
-        print(
-            f"\nCreating {source_record.id} {json.dumps(source_record.metadata, ensure_ascii=False, indent=4)}"
+        self.audit.info(
+            f"\nCreating {source_record.record_id} {json.dumps(source_record.metadata, ensure_ascii=False, indent=4)}"
         )
-        return DryRepositoryRecord(source_record)
+        return NullRepositoryRecord(source_record, self.audit)
 
     def delete_record(self, record: RepositoryRecord):
-        print(f"\nDeleting {record.record_id}")
+        self.audit.info(f"\nDeleting {record.record_id}")

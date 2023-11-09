@@ -4,8 +4,8 @@ import arrow
 import click
 from tqdm import tqdm
 
+from oarepo_upload_cli.audit import Audit, AuditLevel
 from oarepo_upload_cli.config import Config
-from oarepo_upload_cli.dry_run import DryRepositoryClient
 from oarepo_upload_cli.entry_points_loader import EntryPointsLoader
 from oarepo_upload_cli.source import SourceRecord
 from oarepo_upload_cli.uploader import Uploader
@@ -47,25 +47,32 @@ from oarepo_upload_cli.uploader import Uploader
 @click.option(
     "--modified_before", help="Timestamp that represents date before modification."
 )
-@click.option("--dry/--no-dry", help="Dry run - do not upload anything")
+@click.option("--dry-run/--no-dry-run", help="Dry run - do not upload anything")
 @click.option("--suppress-warnings/--no-suppress-warnings")
+@click.option("-v", "--verbose", count=True)
+@click.option("--audit-file")
 def main(
     config_name,
     source_name,
     repository_name,
     modified_after,
     modified_before,
-    dry,
+    dry_run,
     suppress_warnings,
     token,
     collection_url,
     record_modified_field,
     file_modified_field,
+    verbose,
+    audit_file,
 ) -> None:
     if suppress_warnings:
         import warnings
 
         warnings.filterwarnings("ignore")
+
+    audit = Audit(AuditLevel.ERROR, audit_file=audit_file)
+    audit.set_verbosity(verbose)
 
     # -----------------
     # - Configuration -
@@ -86,11 +93,10 @@ def main(
     # --------------------------------
     # - Source and repository client -
     # --------------------------------
-    source = ep_loader.load_entry_point(config.source_name)(config)
-    if dry:
-        repository = DryRepositoryClient(config)
-    else:
-        repository = ep_loader.load_entry_point(config.repository_name)(config)
+    source = ep_loader.load_entry_point(config.source_name)(config, audit)
+    repository = ep_loader.load_entry_point(config.repository_name)(
+        config, audit=audit, dry_run=dry_run
+    )
 
     # --------------
     # - Timestamps -
@@ -105,7 +111,10 @@ def main(
     # - Upload -
     # ----------
 
-    progress_bar = tqdm()
+    if verbose and not audit_file:
+        progress_bar = tqdm(disable=True)
+    else:
+        progress_bar = tqdm()
 
     def callback(source_record: SourceRecord, cnt, approximate_count, message):
         if progress_bar.total != approximate_count:
