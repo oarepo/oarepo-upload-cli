@@ -1,6 +1,7 @@
 import time
 
 import requests
+import sys
 import urllib3.exceptions
 
 from oarepo_upload_cli.exceptions import (
@@ -31,6 +32,7 @@ class InvenioConnection:
         request_method = getattr(globals()["requests"], http_verb)
 
         for retry in range(5):
+            res = None
             try:
                 res = request_method(
                     verify=False, auth=self._auth, headers=headers, **kwargs
@@ -50,9 +52,24 @@ class InvenioConnection:
                     ExceptionMessage.ConnectionError, conn_err
                 ) from conn_err
             except requests.HTTPError as http_err:
-                raise RepositoryCommunicationException(
-                    ExceptionMessage.HTTPError, http_err, res.text, url=kwargs["url"]
-                ) from http_err
+                if res:
+                    print(
+                        "Error in http communication",
+                        res.text,
+                        res.status_code,
+                        kwargs,
+                        file=sys.stderr,
+                    )
+                    raise RepositoryCommunicationException(
+                        ExceptionMessage.HTTPError,
+                        http_err,
+                        res.text,
+                        url=kwargs["url"],
+                    ) from http_err
+                else:
+                    raise RepositoryCommunicationException(
+                        str(http_err), http_err
+                    ) from http_err
             except Exception as err:
                 raise RepositoryCommunicationException(str(err), err) from err
 
